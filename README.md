@@ -11,6 +11,8 @@ Allows for the exporting of individual pokemon in the .pk1 format.
 
 The GBC pokémon icons are from [hax.iimarck.us](http://hax.iimarck.us/post/35558/#p35558).
 
+Font (pokemon-gb) designed by [Jackster Productions](http://www.fontspace.com/jackster-productions/pokemon-gb)
+
 **Licensing:**
 
 This software is licensed under the terms of the GPLv3.  
