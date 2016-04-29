@@ -1,35 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Rhydon
 {
     public class ItemList
     {
-        private int Capacity;
+        private readonly int Capacity;
         private int Count;
 
-        private ItemEntry[] items; 
+        private readonly ItemEntry[] items; 
 
         public ItemList(byte[] Source, int c)
         {
             Capacity = c;
             Count = Source[0];
-            Count = Source[0];
             if (Count > Capacity)
-                throw new ArgumentOutOfRangeException("Invalid Item List (count > Capacity)");
+                throw new ArgumentOutOfRangeException();
             items = new ItemEntry[Capacity];
             for (int i = 0; i < Capacity; i++)
             {
-                if (i < Count)
-                    items[i] = new ItemEntry(Source[1 + 2*i], Source[2 + 2*i]);
-                else
-                {
-                    items[i] = new ItemEntry(0, 0);
-                }
+                items[i] = i < Count 
+                    ? new ItemEntry(Source[1 + 2*i], Source[2 + 2*i]) 
+                    : new ItemEntry(0, 0);
             }
         }
 

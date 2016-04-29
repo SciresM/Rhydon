@@ -1,23 +1,18 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 namespace Rhydon
 {
-    public class PokemonListPanel : Panel
+    public sealed class PokemonListPanel : Panel
     {
-
-        public PokemonList pokemonlist = new PokemonList();
-
+        public PokemonList pokemonlist;
         private PictureBox[] PartySprites;
         private Label[] Pokemon;
-
         private int Capacity;
-        private string salt;
-
-        private ContextMenuStrip mnu;
+        private readonly string salt;
+        private readonly ContextMenuStrip mnu;
 
         public PokemonListPanel(PokemonList pl, ContextMenuStrip cms, int num_visible = 6)
         {
@@ -41,28 +36,32 @@ namespace Rhydon
 
             for (int i = 0; i < Capacity; i++)
             {
-                PartySprites[i] = new PictureBox();
-                PartySprites[i].Size = new Size(16, 16);
-                PartySprites[i].Location = new Point(10, 5 + i * 26);
-                PartySprites[i].Name = salt + salt + "_" + i.ToString();
-                PartySprites[i].ContextMenuStrip = mnu;
-                PartySprites[i].Tag = pokemonlist;
-                PartySprites[i].AllowDrop = true;
-                PartySprites[i].DragEnter += new DragEventHandler(HandleDragEnter);
-                PartySprites[i].DragDrop += new DragEventHandler(HandleDragDrop);
-                PartySprites[i].MouseDown += new MouseEventHandler(HandleMouseDown);
+                PartySprites[i] = new PictureBox
+                {
+                    Size = new Size(16, 16),
+                    Location = new Point(10, 5 + i*26),
+                    Name = salt + salt + "_" + i,
+                    ContextMenuStrip = mnu,
+                    Tag = pokemonlist,
+                    AllowDrop = true
+                };
+                PartySprites[i].DragEnter += HandleDragEnter;
+                PartySprites[i].DragDrop += HandleDragDrop;
+                PartySprites[i].MouseDown += HandleMouseDown;
 
-                Pokemon[i] = new Label();
-                Pokemon[i].Font = Util.Pokered_US;
-                Pokemon[i].AutoSize = true;
-                Pokemon[i].Location = new Point(31, 5 + i * 26);
-                Pokemon[i].Name = salt + salt + "_" + i.ToString();
-                Pokemon[i].ContextMenuStrip = mnu;
-                Pokemon[i].Tag = pokemonlist;
-                Pokemon[i].AllowDrop = true;
-                Pokemon[i].DragEnter += new DragEventHandler(HandleDragEnter);
-                Pokemon[i].DragDrop += new DragEventHandler(HandleDragDrop);
-                Pokemon[i].MouseDown += new MouseEventHandler(HandleMouseDown);
+                Pokemon[i] = new Label
+                {
+                    Font = Util.Pokered_US,
+                    AutoSize = true,
+                    Location = new Point(31, 5 + i*26),
+                    Name = salt + salt + "_" + i,
+                    ContextMenuStrip = mnu,
+                    Tag = pokemonlist,
+                    AllowDrop = true
+                };
+                Pokemon[i].DragEnter += HandleDragEnter;
+                Pokemon[i].DragDrop += HandleDragDrop;
+                Pokemon[i].MouseDown += HandleMouseDown;
 
                 Controls.Add(PartySprites[i]);
                 Controls.Add(Pokemon[i]);
@@ -87,20 +86,24 @@ namespace Rhydon
                 Controls.Clear();
                 for (int i = 0; i < Capacity; i++)
                 {
-                    PartySprites[i] = new PictureBox();
-                    PartySprites[i].Size = new Size(16, 16);
-                    PartySprites[i].Location = new Point(10, 5 + i * 26);
-                    PartySprites[i].Name = salt + "_" + i.ToString();
-                    PartySprites[i].ContextMenuStrip = mnu;
-                    PartySprites[i].Tag = pokemonlist;
+                    PartySprites[i] = new PictureBox
+                    {
+                        Size = new Size(16, 16),
+                        Location = new Point(10, 5 + i*26),
+                        Name = salt + "_" + i,
+                        ContextMenuStrip = mnu,
+                        Tag = pokemonlist
+                    };
 
-                    Pokemon[i] = new Label();
-                    Pokemon[i].Font = Util.Pokered_US;
-                    Pokemon[i].AutoSize = true;
-                    Pokemon[i].Location = new Point(31, 5 + i * 26);
-                    Pokemon[i].Name = salt + "_" + i.ToString();
-                    Pokemon[i].ContextMenuStrip = mnu;
-                    Pokemon[i].Tag = pokemonlist;
+                    Pokemon[i] = new Label
+                    {
+                        Font = Util.Pokered_US,
+                        AutoSize = true,
+                        Location = new Point(31, 5 + i*26),
+                        Name = salt + "_" + i,
+                        ContextMenuStrip = mnu,
+                        Tag = pokemonlist
+                    };
 
                     Controls.Add(PartySprites[i]);
                     Controls.Add(Pokemon[i]);
@@ -132,7 +135,7 @@ namespace Rhydon
 
         private int getSlot(object sender)
         {
-            sender = (((sender as ToolStripItem)?.GetCurrentParent() as ContextMenuStrip)?.SourceControl) ?? sender as Control;
+            sender = ((sender as ToolStripItem)?.GetCurrentParent() as ContextMenuStrip)?.SourceControl ?? sender as Control;
             return int.Parse((sender as Control).Name.TrimStart('_'));
         }
 
@@ -156,9 +159,7 @@ namespace Rhydon
             int index = getSlot(sender);
             MainForm mf = FindForm() as MainForm;
             PK1 to_set = mf.pk1;
-            PokemonListPanel PLC =
-                (((sender as ToolStripItem)?.GetCurrentParent() as ContextMenuStrip)?.SourceControl).Parent as
-                    PokemonListPanel;
+            PokemonListPanel PLC = (((sender as ToolStripItem)?.GetCurrentParent() as ContextMenuStrip)?.SourceControl).Parent as PokemonListPanel;
             if (PLC == this)
             {
                 PLC.set(index, to_set);
@@ -228,45 +229,39 @@ namespace Rhydon
             object[] files = (object[])e.Data.GetData(DataFormats.FileDrop);
             if (e.Effect == DragDropEffects.Copy)
             {
-                if (files.Length > 0)
+                if (files.Length <= 0)
+                    return;
+                FileInfo fi = new FileInfo((string)files[0]);
+                if ((int) fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
                 {
-                    FileInfo fi = new FileInfo((string)files[0]);
-                    if ((int) fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
+                    byte[] data = File.ReadAllBytes((string) files[0]);
+                    if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
                     {
-                        byte[] data = File.ReadAllBytes((string) files[0]);
-                        if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
-                        {
-                            parent.set(slot, new PokemonList(data)[0]);
-                        }
-                        else
-                        {
-                            mf.openFile((string) files[0]);
-                        }
+                        parent.set(slot, new PokemonList(data)[0]);
                     }
                     else
                     {
                         mf.openFile((string)files[0]);
                     }
                 }
+                else
+                {
+                    mf.openFile((string)files[0]);
+                }
             }
             else if (e.Effect == DragDropEffects.Move)
             {
-                if (files.Length == 1)
+                if (files.Length != 1)
+                    return;
+                if (sender_parent == null)
                 {
-                    if (sender_parent == null)
+                    FileInfo fi = new FileInfo((string)files[0]);
+                    if ((int)fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
                     {
-                        FileInfo fi = new FileInfo((string)files[0]);
-                        if ((int)fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
+                        byte[] data = File.ReadAllBytes((string)files[0]);
+                        if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
                         {
-                            byte[] data = File.ReadAllBytes((string)files[0]);
-                            if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
-                            {
-                                parent.set(slot, new PokemonList(data)[0]);
-                            }
-                            else
-                            {
-                                mf.openFile((string)files[0]);
-                            }
+                            parent.set(slot, new PokemonList(data)[0]);
                         }
                         else
                         {
@@ -275,12 +270,16 @@ namespace Rhydon
                     }
                     else
                     {
-                        PK1 temp = parent.pokemonlist[slot];
-                        int count = parent.pokemonlist.Count;
-                        parent.set(slot, sender_parent.pokemonlist[sender_slot]);
-                        if (slot < count)
-                            sender_parent.set(sender_slot, temp);
+                        mf.openFile((string)files[0]);
                     }
+                }
+                else
+                {
+                    PK1 temp = parent.pokemonlist[slot];
+                    int count = parent.pokemonlist.Count;
+                    parent.set(slot, sender_parent.pokemonlist[sender_slot]);
+                    if (slot < count)
+                        sender_parent.set(sender_slot, temp);
                 }
             }
         }
@@ -312,7 +311,7 @@ namespace Rhydon
                 return;
             Cursor.Current = Cursors.Hand;
 
-            byte[] dragdata = (new PokemonList(parent.pokemonlist[index])).GetBytes();
+            byte[] dragdata = new PokemonList(parent.pokemonlist[index]).GetBytes();
 
 
             string filename = RBY_Encoding.GetString(parent.pokemonlist[index].Nickname) + " - " +
@@ -334,7 +333,7 @@ namespace Rhydon
             sender_parent = null;
         }
 
-        private static PokemonListPanel sender_parent = null;
-        private static int sender_slot = 0;
+        private static PokemonListPanel sender_parent;
+        private static int sender_slot;
     }
 }

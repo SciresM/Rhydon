@@ -9,7 +9,7 @@ namespace Rhydon
         internal const int CAPACITY_PARTY = 6;
         internal const int CAPACITY_STORED = 20;
 
-        internal static readonly byte[] EMPTY_LIST = new byte[] { 0x01, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50 };
+        internal static readonly byte[] EMPTY_LIST = { 0x01, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x50 };
 
         public enum CapacityType
         {
@@ -21,31 +21,25 @@ namespace Rhydon
 
         public static int getEntrySize(CapacityType c)
         {
-            if (c == CapacityType.Single || c == CapacityType.Party)
-                return PK1.SIZE_PARTY;
-            else
-                return PK1.SIZE_STORED;
+            return c == CapacityType.Single || c == CapacityType.Party 
+                ? PK1.SIZE_PARTY 
+                : PK1.SIZE_STORED;
         }
 
         public static byte getCapacity(CapacityType c)
         {
-            if (c == CapacityType.Single)
-                return 1;
-            else
-            {
-                return (byte)c;
-            }
+            return c == CapacityType.Single ? (byte)1 : (byte)c;
         }
 
         private byte[] getEmptyList(CapacityType c)
         {
             int cap = getCapacity(c);
-            return (new[] { (byte)0 }).Concat(Enumerable.Repeat((byte)0xFF, cap + 1)).Concat(Enumerable.Repeat((byte)0, getEntrySize(c) * cap)).Concat(Enumerable.Repeat((byte)0x50, 0xB * 2 * cap)).ToArray();
+            return new[] { (byte)0 }.Concat(Enumerable.Repeat((byte)0xFF, cap + 1)).Concat(Enumerable.Repeat((byte)0, getEntrySize(c) * cap)).Concat(Enumerable.Repeat((byte)0x50, 0xB * 2 * cap)).ToArray();
         }
 
         public PokemonList(byte[] d, CapacityType c = CapacityType.Single)
         {
-            Data = (byte[])(d ?? getEmptyList(c));
+            Data = d ?? getEmptyList(c);
             Capacity = getCapacity(c);
             Entry_Size = getEntrySize(c);
             if (Data.Length != DataSize)
@@ -76,14 +70,14 @@ namespace Rhydon
             Count = 1;
         }
 
-        public byte[] Data;
-        private byte Capacity;
-        private int Entry_Size;
+        private readonly byte[] Data;
+        private readonly byte Capacity;
+        private readonly int Entry_Size;
 
         public byte Count
         {
             get { return Data[0]; }
-            set { Data[0] = (value > Capacity) ? Capacity : value; }
+            set { Data[0] = value > Capacity ? Capacity : value; }
         }
 
         public int GetCapacity()
@@ -92,13 +86,13 @@ namespace Rhydon
         }
 
 
-        public PK1[] Pokemon;
+        public readonly PK1[] Pokemon;
 
         public PK1 this[int i]
         {
             get
             {
-                if (i > Capacity || i < 0) throw new IndexOutOfRangeException(string.Format("Invalid PokemonList Access: {0}", i));
+                if (i > Capacity || i < 0) throw new IndexOutOfRangeException($"Invalid PokemonList Access: {i}");
                 return Pokemon[i];
             }
             set
@@ -132,7 +126,7 @@ namespace Rhydon
 
         public static int GetDataLength(CapacityType c)
         {
-            return (getCapacity(c)) * (getEntrySize(c) + 23) + 2;
+            return getCapacity(c) * (getEntrySize(c) + 23) + 2;
         }
     }
 }

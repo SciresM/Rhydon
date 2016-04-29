@@ -5,8 +5,7 @@ namespace Rhydon.SAV
     public partial class SAV_Options : Form
     {
 
-        private SAV1 sav;
-        private bool initialized = false;
+        private readonly SAV1 sav;
         public SAV_Options(ref SAV1 source)
         {
             InitializeComponent();
@@ -21,8 +20,6 @@ namespace Rhydon.SAV
             CB_BattleStyle.SelectedIndex = sav.BattleStyleSwitch ? 0 : 1;
             CB_SoundType.SelectedIndex = sav.Sound;
             CB_TextSpeed.SelectedIndex = sav.TextSpeed;
-
-            initialized = true;
         }
 
         private void Cancel(object sender, System.EventArgs e)

@@ -23,7 +23,7 @@ namespace Rhydon
             initializedFields = true;
         }
 
-        private PokemonList pk1_wrapper = new PokemonList();
+        private readonly PokemonList pk1_wrapper = new PokemonList();
 
         private PokemonListPanel PLC_Box;
         private PokemonListPanel PLC_Party;
@@ -79,14 +79,9 @@ namespace Rhydon
             TB_SaveName.Font = Util.Pokered_US;
             TB_Rival.Font = Util.Pokered_US;
 
-            PLC_Box = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Stored), mnuVSD);
-            PLC_Box.Location = new Point(16, 35);
-
-            PLC_Party = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Party), mnuVSD);
-            PLC_Party.Location = new Point(16, 35);
-
-            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE);
-            PLC_DayCare.Location = new Point(16, 214);
+            PLC_Box = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Stored), mnuVSD) { Location = new Point(16, 35) };
+            PLC_Party = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Party), mnuVSD) { Location = new Point(16, 35) };
+            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE) {Location = new Point(16, 214)}; 
 
             Tab_BoxDaycare.Controls.Add(PLC_Box);
             Tab_PartyMisc.Controls.Add(PLC_Party);
@@ -143,8 +138,8 @@ namespace Rhydon
             }
         }
 
-        private bool changingFields = false;
-        private bool initializedFields;
+        private bool changingFields;
+        private readonly bool initializedFields;
         private bool saveLoaded;
 
         private bool inChildForm;
@@ -183,7 +178,7 @@ namespace Rhydon
             TB_Coins.Text = sav.Coins;
             TB_BoxIndex.Text = (sav.Current_Box_Index + 1).ToString("00");
 
-            TB_PikaFriend.Text = (sav.Pika_Friendship).ToString("000");
+            TB_PikaFriend.Text = sav.Pika_Friendship.ToString("000");
         }
 
         public void PopulateFields(PK1 pk, bool focus = true)
@@ -288,7 +283,7 @@ namespace Rhydon
             if (e.Button != MouseButtons.Left || e.Clicks != 1 || inChildForm) return;
 
 
-            byte[] dragdata = (pk1_wrapper).GetBytes();
+            byte[] dragdata = pk1_wrapper.GetBytes();
 
 
             string filename = RBY_Encoding.GetString(pk1.Nickname) + " - " +
@@ -376,8 +371,8 @@ namespace Rhydon
 
             changingFields = true;
             pk1.STATEXPs =
-                (new[] { TB_HPSTATEXP, TB_ATKSTATEXP, TB_DEFSTATEXP, TB_SPDSTATEXP, TB_SPCSTATEXP }.Select(
-                    t => (ushort)Util.ToUInt32(t.Text)).ToArray());
+                new[] { TB_HPSTATEXP, TB_ATKSTATEXP, TB_DEFSTATEXP, TB_SPDSTATEXP, TB_SPCSTATEXP }.Select(
+                    t => (ushort)Util.ToUInt32(t.Text)).ToArray();
             changingFields = false;
 
             updateStats();
@@ -451,12 +446,14 @@ namespace Rhydon
                 {
                     try
                     {
-                        PokemonList empty = new PokemonList((byte[])PokemonList.EMPTY_LIST.Clone(), PokemonList.CapacityType.Single);
-                        empty[0].OT_Name = RBY_Encoding.GetBytes("Rhydon");
-                        empty[0].Nickname = RBY_Encoding.GetBytes("RHYDON");
-                        empty[0].TID = 12345;
-                        empty[0].Species = 1;
-                        empty[0].Level = 1;
+                        PokemonList empty = new PokemonList((byte[]) PokemonList.EMPTY_LIST.Clone())
+                        {
+                            [0] = {OT_Name = RBY_Encoding.GetBytes("Rhydon")},
+                            [0] = {Nickname = RBY_Encoding.GetBytes("RHYDON")},
+                            [0] = {TID = 12345},
+                            [0] = {Species = 1},
+                            [0] = {Level = 1}
+                        };
 
                         openFile(empty.GetBytes(), path, ext);
                     }
@@ -476,14 +473,14 @@ namespace Rhydon
                 }
                 else
                 {
-                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format("File Loaded:{Environment.NewLine}{path}"));
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
             }
             else if (input.Length == 0x8000)
             {
                 if (ext != ".dat" && ext != ".sav")
                 {
-                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .sav/.dat supported.", string.Format("File Loaded:{Environment.NewLine}{path}"));
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .sav/.dat supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
                 saveLoaded = Menu_ExportSAV.Enabled = false;
                 PopulateFields(new SAV1(input)
@@ -513,7 +510,6 @@ namespace Rhydon
             };
             if (sfd.ShowDialog() != DialogResult.OK) return;
             string path = sfd.FileName;
-            string ext = Path.GetExtension(path);
 
             if (File.Exists(path))
             {
@@ -522,7 +518,7 @@ namespace Rhydon
                 File.WriteAllBytes(path + ".bak", backupfile);
             }
 
-            File.WriteAllBytes(path, (new PokemonList(pk1)).GetBytes());
+            File.WriteAllBytes(path, new PokemonList(pk1).GetBytes());
         }
 
         private void clickBoxRight(object sender, EventArgs e)
@@ -562,7 +558,7 @@ namespace Rhydon
                 Filter = "DAT file|*.dat|SAV File|*.sav",
                 FileName = sav.FileName,
                 RestoreDirectory = true,
-                FilterIndex = (Path.GetExtension(sav.FileName) == ".dat" ? 1 : 2)
+                FilterIndex = Path.GetExtension(sav.FileName) == ".dat" ? 1 : 2
             };
             if (Directory.Exists(sav.FilePath))
                 sfd.InitialDirectory = sav.FilePath;
@@ -667,16 +663,17 @@ namespace Rhydon
             if (changingFields || !initializedFields) return;
 
             changingFields = true;
-            ComboBox[] moveBoxs = new[] { CB_Move1, CB_Move2, CB_Move3, CB_Move4 };
-            MaskedTextBox[] PPs = new[] { TB_PP1, TB_PP2, TB_PP3, TB_PP4 };
-            ComboBox[] PPus = new[] { CB_PPu1, CB_PPu2, CB_PPu3, CB_PPu4 };
+            ComboBox[] moveBoxs = { CB_Move1, CB_Move2, CB_Move3, CB_Move4 };
+            MaskedTextBox[] PPs = { TB_PP1, TB_PP2, TB_PP3, TB_PP4 };
+            ComboBox[] PPus = { CB_PPu1, CB_PPu2, CB_PPu3, CB_PPu4 };
 
             pk1.Moves = moveBoxs.Select(cb => (byte)(int)cb.SelectedValue).ToArray();
-            pk1.PPUPs = PPus.Select(cb => (byte)(int)cb.SelectedIndex).ToArray();
+            pk1.PPUPs = PPus.Select(cb => (byte)cb.SelectedIndex).ToArray();
 
-            if (sender is MaskedTextBox)
+            MaskedTextBox box = sender as MaskedTextBox;
+            if (box != null)
             {
-                int ind = Array.IndexOf(PPs, (MaskedTextBox)sender);
+                int ind = Array.IndexOf(PPs, box);
                 uint PP = Util.ToUInt32(PPs[ind].Text);
                 if (PP > 63)
                     PP = 63;
@@ -710,7 +707,7 @@ namespace Rhydon
         private void openOptionsForm(object sender, EventArgs e)
         {
             inChildForm = true;
-            (new SAV_Options(ref sav)).ShowDialog(this);
+            new SAV_Options(ref sav).ShowDialog(this);
             inChildForm = false;
         }
 
@@ -751,14 +748,14 @@ namespace Rhydon
         private void openPokedexForm(object sender, EventArgs e)
         {
             inChildForm = true;
-            (new SAV_Pokedex(ref sav)).ShowDialog(this);
+            new SAV_Pokedex(ref sav).ShowDialog(this);
             inChildForm = false;
         }
 
         private void openInventoryForm(object sender, EventArgs e)
         {
             inChildForm = true;
-            (new SAV_Inventory(ref sav)).ShowDialog(this);
+            new SAV_Inventory(ref sav).ShowDialog(this);
             inChildForm = false;
         }
 
