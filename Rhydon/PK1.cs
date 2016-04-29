@@ -170,7 +170,7 @@ namespace Rhydon
 
         public int DV_HP
         {
-            get { return (((DV_ATK & 1) << 3) | ((DV_DEF & 1) << 2) | ((DV_SPD & 1) << 1) | ((DV_SPC & 1) << 0)); }
+            get { return ((DV_ATK & 1) << 3) | ((DV_DEF & 1) << 2) | ((DV_SPD & 1) << 1) | ((DV_SPC & 1) << 0); }
         }
 
         public byte PP_1
@@ -337,8 +337,8 @@ namespace Rhydon
                 ushort L = Current_Level;
                 ushort B = (ushort)Tables.ID_To_Base_Stats[Species][i];
                 ushort I = (ushort)DVs[i];
-                ushort E = (ushort)(Math.Floor(Math.Ceiling(Math.Sqrt(STATEXPs[i])) / 4.0));
-                Stats[i] = (ushort)(Math.Floor(((2 * (B + I) + E) * L / 100.0 + 5)));
+                ushort E = (ushort)Math.Floor(Math.Ceiling(Math.Sqrt(STATEXPs[i])) / 4.0);
+                Stats[i] = (ushort)Math.Floor((2 * (B + I) + E) * L / 100.0 + 5);
             }
             Stats[0] += (ushort)(5 + Level); // HP
 

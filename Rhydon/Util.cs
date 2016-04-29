@@ -1,10 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Net;
 using System.Windows.Forms;
 using Rhydon.Properties;
 
@@ -15,24 +14,13 @@ namespace Rhydon
         public static Font Pokered_US;
         public static bool UseFancySprites = true;
 
-        public static void RemoveClickEvent(ToolStripItem b)
-        {
-            FieldInfo f1 = typeof(Control).GetField("EventClick",
-                BindingFlags.Static | BindingFlags.NonPublic);
-            object obj = f1.GetValue(b);
-            PropertyInfo pi = b.GetType().GetProperty("Events",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            EventHandlerList list = (EventHandlerList)pi.GetValue(b, null);
-            list.RemoveHandler(obj, list[obj]);
-        }
-
         private static readonly Bitmap[] partysprites = { Resources.SPRITE_MON, Resources.SPRITE_BALL, Resources.SPRITE_HELIX, Resources.SPRITE_FAIRY, Resources.SPRITE_BIRD_M, Resources.SPRITE_WATER, Resources.SPRITE_BUG, Resources.SPRITE_GRASS, Resources.SPRITE_SNAKE, Resources.SPRITE_QUADRUPED };
 
         public static Bitmap GetPartySprite(PK1 pk)
         {
-            if (UseFancySprites)
-                return (Resources.ResourceManager.GetObject(string.Format("_{0}_0",Tables.ID_To_Dex[pk.Species])) as Image ?? new Bitmap(16, 16)).Clone() as Bitmap;
-            return GetPartySprite(Tables.ID_To_Sprite[pk.Species]);
+            return UseFancySprites
+                ? (Resources.ResourceManager.GetObject($"_{Tables.ID_To_Dex[pk.Species]}_0") as Image ?? new Bitmap(16, 16)).Clone() as Bitmap
+                : GetPartySprite(Tables.ID_To_Sprite[pk.Species]);
         }
 
         public static Bitmap GetPartySprite(int index)
@@ -64,34 +52,30 @@ namespace Rhydon
 
         public static byte[] GetBytes(ushort value)
         {
-            if (BitConverter.IsLittleEndian)
-                return BitConverter.GetBytes(value).Reverse().ToArray();
-            else
-                return BitConverter.GetBytes(value);
+            return BitConverter.IsLittleEndian 
+                ? BitConverter.GetBytes(value).Reverse().ToArray() 
+                : BitConverter.GetBytes(value);
         }
 
         public static byte[] GetBytes(uint value)
         {
-            if (BitConverter.IsLittleEndian)
-                return BitConverter.GetBytes(value).Reverse().ToArray();
-            else
-                return BitConverter.GetBytes(value);
+            return BitConverter.IsLittleEndian 
+                ? BitConverter.GetBytes(value).Reverse().ToArray() 
+                : BitConverter.GetBytes(value);
         }
 
         public static ushort ToUInt16(byte[] d, int i)
         {
-            if (BitConverter.IsLittleEndian)
-                return (ushort)System.Net.IPAddress.HostToNetworkOrder((short)BitConverter.ToUInt16(d, i));
-            else
-                return BitConverter.ToUInt16(d, i);
+            return BitConverter.IsLittleEndian
+                ? (ushort)IPAddress.HostToNetworkOrder((short) BitConverter.ToUInt16(d, i))
+                : BitConverter.ToUInt16(d, i);
         }
 
         public static uint ToUInt32(byte[] d, int i)
         {
-            if (BitConverter.IsLittleEndian)
-                return (uint)System.Net.IPAddress.HostToNetworkOrder((int)BitConverter.ToUInt32(d, i));
-            else
-                return BitConverter.ToUInt32(d, i);
+            return BitConverter.IsLittleEndian
+                ? (uint)IPAddress.HostToNetworkOrder((int) BitConverter.ToUInt32(d, i))
+                : BitConverter.ToUInt32(d, i);
         }
 
         internal static int ToInt32(string value)
@@ -124,17 +108,17 @@ namespace Rhydon
         private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont,
             IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
 
-        private static PrivateFontCollection fonts = new PrivateFontCollection();
+        private static readonly PrivateFontCollection fonts = new PrivateFontCollection();
         public static void LoadFont()
         {
             try
             {
-                byte[] fontData = Properties.Resources.Pokered_US;
+                byte[] fontData = Resources.Pokered_US;
                 IntPtr fontPtr = System.Runtime.InteropServices.Marshal.AllocCoTaskMem(fontData.Length);
                 System.Runtime.InteropServices.Marshal.Copy(fontData, 0, fontPtr, fontData.Length);
                 uint dummy = 0;
-                fonts.AddMemoryFont(fontPtr, Properties.Resources.Pokered_US.Length);
-                AddFontMemResourceEx(fontPtr, (uint)Properties.Resources.Pokered_US.Length, IntPtr.Zero, ref dummy);
+                fonts.AddMemoryFont(fontPtr, Resources.Pokered_US.Length);
+                AddFontMemResourceEx(fontPtr, (uint)Resources.Pokered_US.Length, IntPtr.Zero, ref dummy);
                 System.Runtime.InteropServices.Marshal.FreeCoTaskMem(fontPtr);
 
                 Pokered_US = new Font(fonts.Families[0], 9.0F);

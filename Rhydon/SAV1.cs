@@ -1,37 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Drawing.Text;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Rhydon
 {
     public class SAV1
     {
-        internal const int OT_NAME_OFS = 0x2598;
-        internal const int POKEDEX_OWNED_OFS = 0x25A3;
-        internal const int POKEDEX_SEEN_OFS = 0x25B6;
-        internal const int ITEM_LIST_OFS = 0x25C9;
-        internal const int MONEY_OFS = 0x25F3;
-        internal const int RIVAL_NAME_OFS = 0x25F6;
-        internal const int OPTIONS_OFS = 0x2601;
-        internal const int BADGE_OFS = 0x2602;
-        internal const int TID_OFS = 0x2605;
-        internal const int FRIENDSHIP_OFS = 0x271C;
-        internal const int PC_ITEM_LIST_OFS = 0x27E6;
-        internal const int CURRENT_BOX_INDEX_OFS = 0x284C;
-        internal const int COINS_OFS = 0x2850;
-        internal const int TIME_OFS = 0x2CED;
-        internal const int DAYCARE_OFS = 0x2CF4;
-        internal const int PARTY_OFS = 0x2F2C;
-        internal const int CURRENT_BOX_OFS = 0x30C0;
-        internal const int CHECKSUM_OFS = 0x3523;
-        internal readonly int[] BOX_OFS = {0x4000, 0x4462, 0x48C4, 0x4D26, 0x5188, 0x55EA, 0x6000, 0x6462, 0x68C4, 0x6D26, 0x7188, 0x75EA};
+        private const int OT_NAME_OFS = 0x2598;
+        private const int POKEDEX_OWNED_OFS = 0x25A3;
+        private const int POKEDEX_SEEN_OFS = 0x25B6;
+        private const int ITEM_LIST_OFS = 0x25C9;
+        private const int MONEY_OFS = 0x25F3;
+        private const int RIVAL_NAME_OFS = 0x25F6;
+        private const int OPTIONS_OFS = 0x2601;
+        private const int BADGE_OFS = 0x2602;
+        private const int TID_OFS = 0x2605;
+        private const int FRIENDSHIP_OFS = 0x271C;
+        private const int PC_ITEM_LIST_OFS = 0x27E6;
+        private const int CURRENT_BOX_INDEX_OFS = 0x284C;
+        private const int COINS_OFS = 0x2850;
+        private const int TIME_OFS = 0x2CED;
+        private const int DAYCARE_OFS = 0x2CF4;
+        private const int PARTY_OFS = 0x2F2C;
+        private const int CURRENT_BOX_OFS = 0x30C0;
+        private const int CHECKSUM_OFS = 0x3523;
+        private readonly int[] BOX_OFS = {0x4000, 0x4462, 0x48C4, 0x4D26, 0x5188, 0x55EA, 0x6000, 0x6462, 0x68C4, 0x6D26, 0x7188, 0x75EA};
 
         public SAV1(byte[] d)
         {
@@ -47,7 +40,7 @@ namespace Rhydon
             Items_Pocket = new ItemList(Data.Skip(ITEM_LIST_OFS).Take(2 * (Data[ITEM_LIST_OFS] + 1)).ToArray(), 20);
             Items_PC = new ItemList(Data.Skip(PC_ITEM_LIST_OFS).Take(2 * (Data[PC_ITEM_LIST_OFS] + 1)).ToArray(), 50);
         }
-        public byte[] Data;
+        public readonly byte[] Data;
         public string FileName;
         public string FilePath;
 
@@ -89,7 +82,7 @@ namespace Rhydon
                 if (value == null || value.Length != 8)
                     return;
                 for (int i = 0; i < value.Length; i++)
-                    Data[BADGE_OFS] = (byte)((Data[BADGE_OFS] & (~(0x1 << i))) | ((value[i] ? 0x1 : 0) << i));
+                    Data[BADGE_OFS] = (byte)((Data[BADGE_OFS] & ~(0x1 << i)) | ((value[i] ? 0x1 : 0) << i));
             }
         }
 
@@ -200,7 +193,7 @@ namespace Rhydon
                     new_speed = 7;
                 if (new_speed < 0)
                     new_speed = 0;
-                Data[OPTIONS_OFS] = (byte)((Data[OPTIONS_OFS] & 0xF8) | (new_speed));
+                Data[OPTIONS_OFS] = (byte)((Data[OPTIONS_OFS] & 0xF8) | new_speed);
             }
         }
 
@@ -278,9 +271,9 @@ namespace Rhydon
 
         public class Pokedex
         {
-            internal const int MAX_SPECIES = 151;
-            private byte[] saveData;
-            private int ofs;
+            private const int MAX_SPECIES = 151;
+            private readonly byte[] saveData;
+            private readonly int ofs;
 
             public Pokedex(ref byte[] d, int offset)
             {
@@ -303,7 +296,7 @@ namespace Rhydon
                     if (ind < 0 || ind > MAX_SPECIES)
                         throw new IndexOutOfRangeException("Invalid Pokedex Index");
                     byte val = saveData[ofs + (ind >> 3)];
-                    val &= (byte)(~(1 << (ind & 7)));
+                    val &= (byte)~(1 << (ind & 7));
                     val |= (byte)((value ? 1 : 0) << (ind & 7));
                     saveData[ofs + (ind >> 3)] = val;
                 }

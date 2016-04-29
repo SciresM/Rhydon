@@ -1,15 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 
 namespace Rhydon
 {
-    public class RBY_Encoding
+    public static class RBY_Encoding
     {
-        internal const byte CHAR_INVALID = 0xFF;
-        internal const byte CHAR_TRAINER = 0xFE;
-        internal const byte CHAR_PK_NUM = 0x7B;
-        internal const byte CHAR_MN_NUM = 0x7D;
+        private const byte CHAR_INVALID = 0xFF;
+        private const byte CHAR_TRAINER = 0xFE;
+        private const byte CHAR_PK_NUM = 0x7B;
+        private const byte CHAR_MN_NUM = 0x7D;
         internal const byte CHAR_MAL_NUM = 0x7E;
         internal const byte CHAR_FEM_NUM = 0x60;
 
@@ -35,12 +34,12 @@ namespace Rhydon
                 s = FixString(s);
             if (s == "[TRAINER]")
                 return new[] { ASCII_To_RBY[CHAR_TRAINER] };
-            return s.Select(c => ASCII_To_RBY[(int)c]).Concat(new[] { (byte)0x50 }).ToArray();
+            return s.Select(c => ASCII_To_RBY[c]).Concat(new[] { (byte)0x50 }).ToArray();
         }
 
         public static bool Validate(string s)
         {
-            return !s.Any(c => ((int)c > 0xFF) || (ASCII_To_RBY[(int)c] == 0));
+            return !s.Any(c => c > 0xFF || ASCII_To_RBY[c] == 0);
         }
 
         public static string FixString(string s)
@@ -315,7 +314,7 @@ namespace Rhydon
 			0x00 /* 0xFF */
 		};
 
-        internal static readonly byte[] RBY_To_ASCII = new[] {
+        internal static readonly byte[] RBY_To_ASCII = {
 			CHAR_INVALID, /* 0x00 */
 			CHAR_INVALID, /* 0x01 */
 			CHAR_INVALID, /* 0x02 */
@@ -574,7 +573,5 @@ namespace Rhydon
 			(byte) '9'  /* 0xFF */
 		};
         #endregion
-
     }
-
 }
