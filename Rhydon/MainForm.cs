@@ -685,7 +685,7 @@ namespace Rhydon
             else
             {
                 int ind = Math.Max(Array.IndexOf(moveBoxs, sender as ComboBox), Array.IndexOf(PPus, sender as ComboBox));
-                int PP = Tables.getMovePP((int)moveBoxs[ind].SelectedValue, PPus[ind].SelectedIndex);
+                int PP = Tables.getMovePP(pk1.Moves[ind], pk1.PPUPs[ind]);
 
                 PPs[ind].Text = PP.ToString();
                 pk1.setPP(ind, (byte)PP);

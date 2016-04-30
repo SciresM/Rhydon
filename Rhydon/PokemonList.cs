@@ -111,6 +111,7 @@ namespace Rhydon
                 Array.Copy(Pokemon[i].OT_Name, 0, Data, 2 + Capacity + Capacity * Entry_Size + 0xB * i, 0xB);
                 Array.Copy(Pokemon[i].Nickname, 0, Data, 2 + Capacity + Capacity * Entry_Size + 0xB * Capacity + 0xB * i, 0xB);
             }
+            Data[1 + Count] = byte.MaxValue;
         }
 
         public byte[] GetBytes()

@@ -182,7 +182,7 @@ namespace Rhydon
         public byte PPUP_1
         {
             get { return (byte)((Data[0x1D] & 0xC0) >> 6); }
-            set { Data[0x1D] = (byte)((Data[0x1D] & 0x3F) | ((value & 0x3) >> 6)); }
+            set { Data[0x1D] = (byte)((Data[0x1D] & 0x3F) | ((value & 0x3) << 6)); }
         }
 
         public byte PP_2
@@ -194,7 +194,7 @@ namespace Rhydon
         public byte PPUP_2
         {
             get { return (byte)((Data[0x1E] & 0xC0) >> 6); }
-            set { Data[0x1E] = (byte)((Data[0x1E] & 0x3F) | ((value & 0x3) >> 6)); }
+            set { Data[0x1E] = (byte)((Data[0x1E] & 0x3F) | ((value & 0x3) << 6)); }
         }
 
         public byte PP_3
@@ -206,7 +206,7 @@ namespace Rhydon
         public byte PPUP_3
         {
             get { return (byte)((Data[0x1F] & 0xC0) >> 6); }
-            set { Data[0x1F] = (byte)((Data[0x1F] & 0x3F) | ((value & 0x3) >> 6)); }
+            set { Data[0x1F] = (byte)((Data[0x1F] & 0x3F) | ((value & 0x3) << 6)); }
         }
 
         public byte PP_4
@@ -218,7 +218,7 @@ namespace Rhydon
         public byte PPUP_4
         {
             get { return (byte)((Data[0x20] & 0xC0) >> 6); }
-            set { Data[0x20] = (byte)((Data[0x20] & 0x3F) | ((value & 0x3) >> 6)); }
+            set { Data[0x20] = (byte)((Data[0x20] & 0x3F) | ((value & 0x3) << 6)); }
         }
 
         // Party Only
@@ -322,10 +322,10 @@ namespace Rhydon
             set
             {
                 if (value == null || value.Length != 4) return;
-                PPUP_1 = Math.Max(value[0], (byte)3);
-                PPUP_2 = Math.Max(value[1], (byte)3);
-                PPUP_3 = Math.Max(value[2], (byte)3);
-                PPUP_4 = Math.Max(value[3], (byte)3);
+                PPUP_1 = Math.Min(value[0], (byte)3);
+                PPUP_2 = Math.Min(value[1], (byte)3);
+                PPUP_3 = Math.Min(value[2], (byte)3);
+                PPUP_4 = Math.Min(value[3], (byte)3);
             }
         }
 
