@@ -464,6 +464,8 @@ namespace Rhydon
 
         private void openFile(byte[] input, string path, string ext)
         {
+            // Fix case sensitivity with extensions
+            ext = ext.ToLower();
             #region PK1
             if (input.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
             {
