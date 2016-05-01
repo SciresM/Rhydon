@@ -429,6 +429,10 @@ namespace Rhydon
             if (ofd.ShowDialog() == DialogResult.OK)
                 openFile(ofd.FileName);
         }
+        private void mainMenuClose(object sender, EventArgs e)
+        {
+            Close();
+        }
 
         public void openFile(string path)
         {

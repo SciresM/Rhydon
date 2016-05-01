@@ -201,6 +201,7 @@
             this.Menu_Exit.ShowShortcutKeys = false;
             this.Menu_Exit.Size = new System.Drawing.Size(139, 22);
             this.Menu_Exit.Text = "&Quit";
+            this.Menu_Exit.Click += new System.EventHandler(this.mainMenuClose);
             // 
             // Menu_Options
             // 
