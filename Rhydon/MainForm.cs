@@ -131,9 +131,10 @@ namespace Rhydon
             {
                 TB_OT.Text = "Rhydon";
                 TB_Nickname.Text = "RHYDON";
+                TB_TID.Text = 12345.ToString();
                 pk1.OT_Name = RBY_Encoding.GetBytes(TB_OT.Text);
                 pk1.Nickname = RBY_Encoding.GetBytes(TB_Nickname.Text);
-                TB_TID.Text = 12345.ToString();
+                pk1.TID = 12345;
                 CB_PPu1.SelectedIndex = CB_PPu2.SelectedIndex = CB_PPu3.SelectedIndex = CB_PPu4.SelectedIndex = 0;
             }
         }

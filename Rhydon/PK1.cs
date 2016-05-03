@@ -18,6 +18,15 @@ namespace Rhydon
             }
         }
 
+        public PK1 Clone()
+        {
+            PK1 new_pk1 = new PK1();
+            Array.Copy(Data, 0, new_pk1.Data, 0, Data.Length);
+            Array.Copy(otname, 0, new_pk1.otname, 0, otname.Length);
+            Array.Copy(nick, 0, new_pk1.nick, 0, nick.Length);
+            return new_pk1;
+        }
+
         // Internal Attributes set on creation
         public byte[] Data; // Raw Storage
         public string Identifier; // User or Form Custom Attribute

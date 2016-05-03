@@ -98,7 +98,7 @@ namespace Rhydon
             set
             {
                 if (value == null) return;
-                Pokemon[i] = value;
+                Pokemon[i] = value.Clone();
             }
         }
 
