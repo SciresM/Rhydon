@@ -41,7 +41,15 @@ namespace Rhydon
         public byte Species
         {
             get { return Data[0]; }
-            set { Data[0] = value; }
+            set
+            {
+                if (value < byte.MinValue || value > byte.MaxValue)
+                    return;
+                Data[0] = value;
+                Type_A = (byte)Tables.ID_To_Base_Stats[value][5];
+                Type_B = (byte)Tables.ID_To_Base_Stats[value][6];
+                Catch_Rate = (byte)Tables.ID_To_Base_Stats[value][7];
+            }
         }
         public ushort HP_Current
         {

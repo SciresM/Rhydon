@@ -42,7 +42,7 @@ namespace Rhydon
         public void updateCount()
         {
             int count = 0;
-            while (this[count].Index != 0 && count < Capacity)
+            while (count < Capacity && this[count].Index != 0)
                 count++;
             Count = count;
         }
