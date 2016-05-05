@@ -242,7 +242,9 @@ namespace Rhydon
             if (focus)
                 Tab_Main.Focus();
 
-            pk1.Current_Level = (byte)Tables.getLevel(pk1.Species, BitConverter.ToUInt32(input, 0x25));
+            pk1.EXP = (Util.ToUInt32(input, 0x25) >> 8) & 0x00FFFFFF;
+
+            pk1.Current_Level = (byte)Tables.getLevel(pk1.Species, pk1.EXP);
             if (pk1.Level == 100)
                 pk1.EXP = Tables.getEXP(pk1.Current_Level, pk1.Species);
             pk1.Level = pk1.Current_Level;
@@ -250,7 +252,7 @@ namespace Rhydon
             changingFields = true;
             CB_Species.SelectedValue = (int)pk1.Species;
 
-            pk1.TID = BitConverter.ToUInt16(input, 0x23); // Investigate
+            pk1.TID = Util.ToUInt16(input, 0x23);
             TB_TID.Text = pk1.TID.ToString("00000");
 
             byte[] otArray = { input[1], input[2], input[3], input[4], input[5], input[6], input[7], input[8], input[9], input[10], input[11] };
@@ -261,20 +263,23 @@ namespace Rhydon
             TB_OT.Text = RBY_Encoding.GetString(pk1.OT_Name);
             TB_Nickname.Text = RBY_Encoding.GetString(pk1.Nickname);
 
-            var test = BitConverter.ToUInt16(input, 0x28);
+            ushort DV16val = Util.ToUInt16(input, 0x32);
+            pk1.DV_ATK = (DV16val >> 12) & 0xF;
+            pk1.DV_DEF = (DV16val >> 8) & 0xF;
+            pk1.DV_SPD = (DV16val >> 4) & 0xF;
+            pk1.DV_SPC = (DV16val >> 0) & 0xF;
 
-            // Bits
-            //TB_HPDV.Text = pk1.DV_HP.ToString();
-            //TB_ATKDV.Text = pk1.DV_ATK.ToString();
-            //TB_DEFDV.Text = pk1.DV_DEF.ToString();
-            //TB_SPDDV.Text = pk1.DV_SPD.ToString();
-            //TB_SPCDV.Text = pk1.DV_SPC.ToString();
+            TB_HPDV.Text = pk1.DV_HP.ToString();
+            TB_ATKDV.Text = pk1.DV_ATK.ToString();
+            TB_DEFDV.Text = pk1.DV_DEF.ToString();
+            TB_SPDDV.Text = pk1.DV_SPD.ToString();
+            TB_SPCDV.Text = pk1.DV_SPC.ToString();
 
-            pk1.STATEXP_HP = BitConverter.ToUInt16(input, 0x28);
-            pk1.STATEXP_ATK = BitConverter.ToUInt16(input, 0x2A);
-            pk1.STATEXP_DEF = BitConverter.ToUInt16(input, 0x2C);
-            pk1.STATEXP_SPC = BitConverter.ToUInt16(input, 0x30);
-            pk1.STATEXP_SPD = BitConverter.ToUInt16(input, 0x2E);
+            pk1.STATEXP_HP = Util.ToUInt16(input, 0x28);
+            pk1.STATEXP_ATK = Util.ToUInt16(input, 0x2A);
+            pk1.STATEXP_DEF = Util.ToUInt16(input, 0x2C);
+            pk1.STATEXP_SPC = Util.ToUInt16(input, 0x30);
+            pk1.STATEXP_SPD = Util.ToUInt16(input, 0x2E);
 
             TB_HPSTATEXP.Text = pk1.STATEXP_HP.ToString();
             TB_ATKSTATEXP.Text = pk1.STATEXP_ATK.ToString();
@@ -294,15 +299,23 @@ namespace Rhydon
             CB_Move3.SelectedValue = (int)pk1.Move_3;
             CB_Move4.SelectedValue = (int)pk1.Move_4;
 
-            // Bits
-            //CB_PPu1.SelectedIndex = pk1.PPUP_1;
-            //CB_PPu2.SelectedIndex = pk1.PPUP_2;
-            //CB_PPu3.SelectedIndex = pk1.PPUP_3;
-            //CB_PPu4.SelectedIndex = pk1.PPUP_4;
-            //TB_PP1.Text = pk1.PP_1.ToString();
-            //TB_PP2.Text = pk1.PP_2.ToString();
-            //TB_PP3.Text = pk1.PP_3.ToString();
-            //TB_PP4.Text = pk1.PP_4.ToString();
+            pk1.PPUP_1 = (byte)((input[0x34] & 0xC0) >> 6);
+            pk1.PPUP_2 = (byte)((input[0x35] & 0xC0) >> 6);
+            pk1.PPUP_3 = (byte)((input[0x36] & 0xC0) >> 6);
+            pk1.PPUP_4 = (byte)((input[0x37] & 0xC0) >> 6);
+            pk1.PP_1 = (byte)(input[0x34] & 0x3F);
+            pk1.PP_2 = (byte)(input[0x35] & 0x3F);
+            pk1.PP_3 = (byte)(input[0x36] & 0x3F);
+            pk1.PP_4 = (byte)(input[0x37] & 0x3F);
+
+            CB_PPu1.SelectedIndex = pk1.PPUP_1;
+            CB_PPu2.SelectedIndex = pk1.PPUP_2;
+            CB_PPu3.SelectedIndex = pk1.PPUP_3;
+            CB_PPu4.SelectedIndex = pk1.PPUP_4;
+            TB_PP1.Text = pk1.PP_1.ToString();
+            TB_PP2.Text = pk1.PP_2.ToString();
+            TB_PP3.Text = pk1.PP_3.ToString();
+            TB_PP4.Text = pk1.PP_4.ToString();
 
             changingFields = false;
             updateStats();
