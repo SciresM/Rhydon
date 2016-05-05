@@ -570,7 +570,7 @@ namespace Rhydon
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
             }
-            else if (input.Length == 0x38)
+            else if (input.Length == 0x38 || input.Length == 0x43)
             {
                 // Legacy PK1 from PKXDelta / PikaSav
                 PopulateFieldsLegacy(input);
