@@ -234,6 +234,80 @@ namespace Rhydon
 
         }
 
+        public void PopulateFieldsLegacy(byte[] input, bool focus = true)
+        {
+            pk1 = new PK1();
+            pk1.Species = input[0];
+
+            if (focus)
+                Tab_Main.Focus();
+
+            pk1.Current_Level = (byte)Tables.getLevel(pk1.Species, BitConverter.ToUInt32(input, 0x25));
+            if (pk1.Level == 100)
+                pk1.EXP = Tables.getEXP(pk1.Current_Level, pk1.Species);
+            pk1.Level = pk1.Current_Level;
+
+            changingFields = true;
+            CB_Species.SelectedValue = (int)pk1.Species;
+
+            pk1.TID = BitConverter.ToUInt16(input, 0x23); // Investigate
+            TB_TID.Text = pk1.TID.ToString("00000");
+
+            byte[] otArray = { input[1], input[2], input[3], input[4], input[5], input[6], input[7], input[8], input[9], input[10], input[11] };
+            pk1.OT_Name = otArray;
+            byte[] nickArray = { input[12], input[13], input[14], input[15], input[16], input[17], input[18], input[19], input[20], input[21], input[22] };
+            pk1.Nickname = nickArray;
+
+            TB_OT.Text = RBY_Encoding.GetString(pk1.OT_Name);
+            TB_Nickname.Text = RBY_Encoding.GetString(pk1.Nickname);
+
+            var test = BitConverter.ToUInt16(input, 0x28);
+
+            // Bits
+            //TB_HPDV.Text = pk1.DV_HP.ToString();
+            //TB_ATKDV.Text = pk1.DV_ATK.ToString();
+            //TB_DEFDV.Text = pk1.DV_DEF.ToString();
+            //TB_SPDDV.Text = pk1.DV_SPD.ToString();
+            //TB_SPCDV.Text = pk1.DV_SPC.ToString();
+
+            pk1.STATEXP_HP = BitConverter.ToUInt16(input, 0x28);
+            pk1.STATEXP_ATK = BitConverter.ToUInt16(input, 0x2A);
+            pk1.STATEXP_DEF = BitConverter.ToUInt16(input, 0x2C);
+            pk1.STATEXP_SPC = BitConverter.ToUInt16(input, 0x30);
+            pk1.STATEXP_SPD = BitConverter.ToUInt16(input, 0x2E);
+
+            TB_HPSTATEXP.Text = pk1.STATEXP_HP.ToString();
+            TB_ATKSTATEXP.Text = pk1.STATEXP_ATK.ToString();
+            TB_DEFSTATEXP.Text = pk1.STATEXP_DEF.ToString();
+            TB_SPCSTATEXP.Text = pk1.STATEXP_SPC.ToString();
+            TB_SPDSTATEXP.Text = pk1.STATEXP_SPD.ToString();
+
+            TB_EXP.Text = pk1.EXP.ToString();
+            TB_Level.Text = pk1.Current_Level.ToString();
+
+            pk1.Move_1 = input[31];
+            pk1.Move_2 = input[32];
+            pk1.Move_3 = input[33];
+            pk1.Move_4 = input[34];
+            CB_Move1.SelectedValue = (int)pk1.Move_1;
+            CB_Move2.SelectedValue = (int)pk1.Move_2;
+            CB_Move3.SelectedValue = (int)pk1.Move_3;
+            CB_Move4.SelectedValue = (int)pk1.Move_4;
+
+            // Bits
+            //CB_PPu1.SelectedIndex = pk1.PPUP_1;
+            //CB_PPu2.SelectedIndex = pk1.PPUP_2;
+            //CB_PPu3.SelectedIndex = pk1.PPUP_3;
+            //CB_PPu4.SelectedIndex = pk1.PPUP_4;
+            //TB_PP1.Text = pk1.PP_1.ToString();
+            //TB_PP2.Text = pk1.PP_2.ToString();
+            //TB_PP3.Text = pk1.PP_3.ToString();
+            //TB_PP4.Text = pk1.PP_4.ToString();
+
+            changingFields = false;
+            updateStats();
+        }
+
         private void UpdateSpecies(object sender, EventArgs e)
         {
             // Change Species Prompted
@@ -482,6 +556,11 @@ namespace Rhydon
                 {
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
+            }
+            else if (input.Length == 0x38)
+            {
+                // Legacy PK1 from PKXDelta / PikaSav
+                PopulateFieldsLegacy(input);
             }
             else if (input.Length == 0x8000)
             {
