@@ -234,93 +234,6 @@ namespace Rhydon
 
         }
 
-        public void PopulateFieldsLegacy(byte[] input, bool focus = true)
-        {
-            pk1 = new PK1();
-            pk1.Species = input[0];
-
-            if (focus)
-                Tab_Main.Focus();
-
-            pk1.EXP = (Util.ToUInt32(input, 0x25) >> 8) & 0x00FFFFFF;
-
-            pk1.Current_Level = (byte)Tables.getLevel(pk1.Species, pk1.EXP);
-            if (pk1.Level == 100)
-                pk1.EXP = Tables.getEXP(pk1.Current_Level, pk1.Species);
-            pk1.Level = pk1.Current_Level;
-
-            changingFields = true;
-            CB_Species.SelectedValue = (int)pk1.Species;
-
-            pk1.TID = Util.ToUInt16(input, 0x23);
-            TB_TID.Text = pk1.TID.ToString("00000");
-
-            byte[] otArray = { input[1], input[2], input[3], input[4], input[5], input[6], input[7], input[8], input[9], input[10], input[11] };
-            pk1.OT_Name = otArray;
-            byte[] nickArray = { input[12], input[13], input[14], input[15], input[16], input[17], input[18], input[19], input[20], input[21], input[22] };
-            pk1.Nickname = nickArray;
-
-            TB_OT.Text = RBY_Encoding.GetString(pk1.OT_Name);
-            TB_Nickname.Text = RBY_Encoding.GetString(pk1.Nickname);
-
-            ushort DV16val = Util.ToUInt16(input, 0x32);
-            pk1.DV_ATK = (DV16val >> 12) & 0xF;
-            pk1.DV_DEF = (DV16val >> 8) & 0xF;
-            pk1.DV_SPD = (DV16val >> 4) & 0xF;
-            pk1.DV_SPC = (DV16val >> 0) & 0xF;
-
-            TB_HPDV.Text = pk1.DV_HP.ToString();
-            TB_ATKDV.Text = pk1.DV_ATK.ToString();
-            TB_DEFDV.Text = pk1.DV_DEF.ToString();
-            TB_SPDDV.Text = pk1.DV_SPD.ToString();
-            TB_SPCDV.Text = pk1.DV_SPC.ToString();
-
-            pk1.STATEXP_HP = Util.ToUInt16(input, 0x28);
-            pk1.STATEXP_ATK = Util.ToUInt16(input, 0x2A);
-            pk1.STATEXP_DEF = Util.ToUInt16(input, 0x2C);
-            pk1.STATEXP_SPC = Util.ToUInt16(input, 0x30);
-            pk1.STATEXP_SPD = Util.ToUInt16(input, 0x2E);
-
-            TB_HPSTATEXP.Text = pk1.STATEXP_HP.ToString();
-            TB_ATKSTATEXP.Text = pk1.STATEXP_ATK.ToString();
-            TB_DEFSTATEXP.Text = pk1.STATEXP_DEF.ToString();
-            TB_SPCSTATEXP.Text = pk1.STATEXP_SPC.ToString();
-            TB_SPDSTATEXP.Text = pk1.STATEXP_SPD.ToString();
-
-            TB_EXP.Text = pk1.EXP.ToString();
-            TB_Level.Text = pk1.Current_Level.ToString();
-
-            pk1.Move_1 = input[31];
-            pk1.Move_2 = input[32];
-            pk1.Move_3 = input[33];
-            pk1.Move_4 = input[34];
-            CB_Move1.SelectedValue = (int)pk1.Move_1;
-            CB_Move2.SelectedValue = (int)pk1.Move_2;
-            CB_Move3.SelectedValue = (int)pk1.Move_3;
-            CB_Move4.SelectedValue = (int)pk1.Move_4;
-
-            pk1.PPUP_1 = (byte)((input[0x34] & 0xC0) >> 6);
-            pk1.PPUP_2 = (byte)((input[0x35] & 0xC0) >> 6);
-            pk1.PPUP_3 = (byte)((input[0x36] & 0xC0) >> 6);
-            pk1.PPUP_4 = (byte)((input[0x37] & 0xC0) >> 6);
-            pk1.PP_1 = (byte)(input[0x34] & 0x3F);
-            pk1.PP_2 = (byte)(input[0x35] & 0x3F);
-            pk1.PP_3 = (byte)(input[0x36] & 0x3F);
-            pk1.PP_4 = (byte)(input[0x37] & 0x3F);
-
-            CB_PPu1.SelectedIndex = pk1.PPUP_1;
-            CB_PPu2.SelectedIndex = pk1.PPUP_2;
-            CB_PPu3.SelectedIndex = pk1.PPUP_3;
-            CB_PPu4.SelectedIndex = pk1.PPUP_4;
-            TB_PP1.Text = pk1.PP_1.ToString();
-            TB_PP2.Text = pk1.PP_2.ToString();
-            TB_PP3.Text = pk1.PP_3.ToString();
-            TB_PP4.Text = pk1.PP_4.ToString();
-
-            changingFields = false;
-            updateStats();
-        }
-
         private void UpdateSpecies(object sender, EventArgs e)
         {
             // Change Species Prompted
@@ -573,7 +486,23 @@ namespace Rhydon
             else if (input.Length == 0x38 || input.Length == 0x43)
             {
                 // Legacy PK1 from PKXDelta / PikaSav
-                PopulateFieldsLegacy(input);
+                byte[] legacyInput = new byte[69];
+                legacyInput[0x00] = 0x01; // 01
+                legacyInput[0x01] = legacyInput[0x03] = input[0x00];
+                legacyInput[0x02] = 0xFF; // FF
+                legacyInput[0x24] = legacyInput[0x25] = legacyInput[0x26] = legacyInput[0x27] = legacyInput[0x28] = legacyInput[0x29] = legacyInput[0x2A] = legacyInput[0x2B] = legacyInput[0x2C] = legacyInput[0x2D] = legacyInput[0x2E] = 0x00;
+
+                for (byte i = 0x04, ii = 0x18; i <= 0x23; i++, ii++)
+                {
+                    legacyInput[i] = input[ii];
+                }
+
+                for (byte i = 0x2F, ii = 0x01; i <= 0x44; i++, ii++)
+                {
+                    legacyInput[i] = input[ii];
+                }
+
+                PopulateFields(new PokemonList(legacyInput)[0]);
             }
             else if (input.Length == 0x8000)
             {
