@@ -483,6 +483,27 @@ namespace Rhydon
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
             }
+            else if (input.Length == 0x38 || input.Length == 0x43)
+            {
+                // Legacy PK1 from PKXDelta / PikaSav
+                byte[] legacyInput = new byte[69];
+                legacyInput[0x00] = 0x01; // 01
+                legacyInput[0x01] = legacyInput[0x03] = input[0x00];
+                legacyInput[0x02] = 0xFF; // FF
+                legacyInput[0x24] = legacyInput[0x25] = legacyInput[0x26] = legacyInput[0x27] = legacyInput[0x28] = legacyInput[0x29] = legacyInput[0x2A] = legacyInput[0x2B] = legacyInput[0x2C] = legacyInput[0x2D] = legacyInput[0x2E] = 0x00;
+
+                for (byte i = 0x04, ii = 0x18; i <= 0x23; i++, ii++)
+                {
+                    legacyInput[i] = input[ii];
+                }
+
+                for (byte i = 0x2F, ii = 0x01; i <= 0x44; i++, ii++)
+                {
+                    legacyInput[i] = input[ii];
+                }
+
+                PopulateFields(new PokemonList(legacyInput)[0]);
+            }
             else if (input.Length == 0x8000)
             {
                 if (ext != ".dat" && ext != ".sav")
