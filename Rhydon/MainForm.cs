@@ -249,6 +249,8 @@ namespace Rhydon
 
             pk1.Species = (byte)Species;
 
+            updateStats(); // New species implies new stats.
+
             UpdateDragOutBox();
         }
 
@@ -439,7 +441,7 @@ namespace Rhydon
         {
             string ext = Path.GetExtension(path);
             FileInfo fi = new FileInfo(path);
-            if (fi.Length > 0x8000)
+            if (fi.Length > 0x802C)
                 Util.Error("Input file is too large.", path);
             else
             {
@@ -483,12 +485,14 @@ namespace Rhydon
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
             }
-            else if (input.Length == 0x8000)
+            else if (input.Length == 0x8000 || input.Length == 0x802C)
             {
                 if (ext != ".dat" && ext != ".sav")
                 {
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .sav/.dat supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
+                if (input.Length == 0x802C) // Support Emulator saves
+                    Array.Resize(ref input, 0x8000);
                 saveLoaded = Menu_ExportSAV.Enabled = false;
                 PopulateFields(new SAV1(input)
                 {
@@ -501,6 +505,12 @@ namespace Rhydon
 
                 // Indicate audibly the save is loaded
                 SystemSounds.Beep.Play();
+            }
+            else
+            {
+                {
+                    Util.Error("Unable to recognize file.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
+                }
             }
             #endregion
         }

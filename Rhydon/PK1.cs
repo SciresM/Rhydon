@@ -354,7 +354,8 @@ namespace Rhydon
                 ushort L = Current_Level;
                 ushort B = (ushort)Tables.ID_To_Base_Stats[Species][i];
                 ushort I = (ushort)DVs[i];
-                ushort E = (ushort)Math.Floor(Math.Ceiling(Math.Sqrt(STATEXPs[i])) / 4.0);
+                ushort E = // Fixed formula via http://www.smogon.com/ingame/guides/rby_gsc_stats
+                    (ushort) Math.Floor(Math.Min(255, Math.Floor(Math.Sqrt(Math.Max(0, STATEXPs[i] - 1)) + 1))/4.0);
                 Stats[i] = (ushort)Math.Floor((2 * (B + I) + E) * L / 100.0 + 5);
             }
             Stats[0] += (ushort)(5 + Level); // HP
