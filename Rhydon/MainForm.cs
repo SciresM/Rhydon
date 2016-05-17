@@ -482,14 +482,28 @@ namespace Rhydon
                 }
                 else
                 {
-                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", $"File Loaded:{Environment.NewLine}{path}");
                 }
             }
+            else if (input.Length == 0x38 || input.Length == 0x43)
+            {
+                // Legacy PK1 from PKXDelta / PikaSav
+                byte[] legacyInput = new byte[69];
+                legacyInput[0x00] = 0x01;
+                legacyInput[0x01] = input[0x00];
+                legacyInput[0x02] = 0xFF;
+                legacyInput[0x03] = input[0x00];
+                Array.Copy(input, 0x18, legacyInput, 0x04, 0x20);
+                Array.Copy(input, 0x01, legacyInput, 0x2F, 0x16);
+                PopulateFields(new PokemonList(legacyInput)[0]);
+            }
+            #endregion
+            #region SAV1
             else if (input.Length == 0x8000 || input.Length == 0x802C)
             {
                 if (ext != ".dat" && ext != ".sav")
                 {
-                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .sav/.dat supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .sav/.dat supported.", $"File Loaded:{Environment.NewLine}{path}");
                 }
                 if (input.Length == 0x802C) // Support Emulator saves
                     Array.Resize(ref input, 0x8000);
@@ -506,13 +520,11 @@ namespace Rhydon
                 // Indicate audibly the save is loaded
                 SystemSounds.Beep.Play();
             }
+            #endregion
             else
             {
-                {
-                    Util.Error("Unable to recognize file.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
-                }
+                Util.Error("Unable to recognize file.", $"File Loaded:{Environment.NewLine}{path}");
             }
-            #endregion
         }
 
         private void mainMenuSave(object sender, EventArgs e)
