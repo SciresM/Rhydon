@@ -34,9 +34,6 @@ namespace Rhydon
             BackColor = Color.White;
             BorderStyle = BorderStyle.FixedSingle;
 
-            if (Capacity == 30)
-                Console.WriteLine("JP Box.");
-
             for (int i = 0; i < Capacity; i++)
             {
                 PartySprites[i] = new PictureBox
@@ -330,8 +327,6 @@ namespace Rhydon
         private void HandleMouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left || e.Clicks != 1) return;
-
-            Console.WriteLine("HandleMouseDown");
 
             Control c = sender as Control;
             if (!(c.FindForm() is MainForm))

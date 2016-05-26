@@ -27,7 +27,7 @@ namespace Rhydon
             foreach (byte b in arr)
             {
                 byte ascii = RBY_To_ASCII[b];
-                if (ascii == 0)
+                if (ascii == 0 || b == 0)
                     return sb.ToString();
                 else if (ascii == CHAR_TRAINER)
                     sb.Append("[TRAINER]");
@@ -43,7 +43,7 @@ namespace Rhydon
             foreach (byte b in arr)
             {
                 char c = (JP_RBY_TO_CHAR.ContainsKey(b)) ? JP_RBY_TO_CHAR[b] : (char)RBY_To_ASCII[b];
-                if (c == 0)
+                if (c == 0 || b == 0)
                     return sb.ToString();
                 if (c == CHAR_TRAINER)
                     sb.Append("トレーナー");
@@ -102,10 +102,6 @@ namespace Rhydon
             {
                 if (CHAR_TO_JP_RBY.ContainsKey(c) || c == CHAR_FEM_NUM || c == CHAR_MAL_NUM)
                     sb.Append(c);
-                else
-                {
-                    Console.WriteLine("Removing invalid character 0x{0} ({1})", ((int) c).ToString("X4"), c);
-                }
             }
             return sb.ToString();
         }

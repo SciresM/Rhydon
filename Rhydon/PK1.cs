@@ -24,12 +24,6 @@ namespace Rhydon
             Array.Copy(Data, 0, new_pk1.Data, 0, Data.Length);
             Array.Copy(otname, 0, new_pk1.otname, 0, otname.Length);
             Array.Copy(nick, 0, new_pk1.nick, 0, nick.Length);
-            if (nick.Any(b => b == 0xEF))
-            {
-                Console.WriteLine(string.Join(",", nick.Select(b => b.ToString("X2"))));
-                Console.WriteLine(RBY_Encoding.GetString(new_pk1.nick, this is JPK1));
-                Console.WriteLine(RBY_Encoding.GetString(nick, this is JPK1) == RBY_Encoding.GetString(new_pk1.nick, this is JPK1));
-            }
             return new_pk1;
         }
 

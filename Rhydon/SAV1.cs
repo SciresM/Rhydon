@@ -324,7 +324,7 @@ namespace Rhydon
                 throw new ArgumentException("SAV file cannot be null.");
             }
 
-            foreach (int ofs in JSAV1.GetBoxOffsets())
+            foreach (int ofs in new[] {0x2ED5, 0x302D})
             {
                 byte num_entries = d[ofs];
                 if (num_entries > 30 || d[ofs + 1 + num_entries] != 0xFF)
@@ -340,7 +340,7 @@ namespace Rhydon
             {
                 throw new ArgumentException("SAV file cannot be null.");
             }
-            foreach (int ofs in USAV1.GetBoxOffsets())
+            foreach (int ofs in new[] {0x2F2C, 0x30C0})
             {
                 byte num_entries = d[ofs];
                 if (num_entries > 20 || d[ofs + 1 + num_entries] != 0xFF)
