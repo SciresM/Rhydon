@@ -19,17 +19,22 @@ namespace Rhydon
 
             InitializeControls();
 
+            if (JP_Mode)
+                pk1 = new JPK1();
+
             InitializeFields();
             initializedFields = true;
         }
 
-        private readonly PokemonList pk1_wrapper = new PokemonList();
+        private PokemonList pk1_wrapper = new PokemonList();
 
         private PokemonListPanel PLC_Box;
         private PokemonListPanel PLC_Party;
         private PokemonListPanel PLC_DayCare;
 
         public bool modify_dex = true;
+
+        public bool JP_Mode = false;
 
         public PK1 pk1
         {
@@ -81,7 +86,7 @@ namespace Rhydon
 
             PLC_Box = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Stored), mnuVSD) { Location = new Point(16, 35) };
             PLC_Party = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Party), mnuVSD) { Location = new Point(16, 35) };
-            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE) {Location = new Point(16, 214)}; 
+            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE) { Location = new Point(16, 214) };
 
             Tab_BoxDaycare.Controls.Add(PLC_Box);
             Tab_PartyMisc.Controls.Add(PLC_Party);
@@ -124,19 +129,35 @@ namespace Rhydon
 
         private void InitializeFields()
         {
+            pk1 = JP_Mode ? new JPK1() : new PK1();
             pk1.Species = (byte)PK1.SpeciesType.Rhydon;
             pk1.Move_1 = (byte)PK1.MoveType.Pound;
 
             PopulateFields(pk1);
             {
-                TB_OT.Text = "Rhydon";
-                TB_Nickname.Text = "RHYDON";
+                if (JP_Mode)
+                {
+                    TB_OT.Text = "サイドン";
+                    TB_Nickname.Text = "サイドン";
+                }
+                else
+                {
+                    TB_OT.Text = "Rhydon";
+                    TB_Nickname.Text = "RHYDON";
+                }
                 TB_TID.Text = 12345.ToString();
-                pk1.OT_Name = RBY_Encoding.GetBytes(TB_OT.Text);
-                pk1.Nickname = RBY_Encoding.GetBytes(TB_Nickname.Text);
+                pk1.OT_Name = RBY_Encoding.GetBytes(TB_OT.Text, JP_Mode);
+                pk1.Nickname = RBY_Encoding.GetBytes(TB_Nickname.Text, JP_Mode);
                 pk1.TID = 12345;
                 CB_PPu1.SelectedIndex = CB_PPu2.SelectedIndex = CB_PPu3.SelectedIndex = CB_PPu4.SelectedIndex = 0;
             }
+        }
+
+        private void SetStringLengths()
+        {
+            var Length = JP_Mode ? 5 : 10;
+
+            TB_OT.MaxLength = TB_Nickname.MaxLength = TB_SaveName.MaxLength = TB_Rival.MaxLength = Length;
         }
 
         private bool changingFields;
@@ -177,7 +198,7 @@ namespace Rhydon
 
             TB_Money.Text = sav.Money;
             TB_Coins.Text = sav.Coins;
-            TB_BoxIndex.Text = (sav.Current_Box_Index + 1).ToString("00");
+            TB_SaveTID.Text = sav.TID.ToString("00000");
 
             TB_PikaFriend.Text = sav.Pika_Friendship.ToString("000");
         }
@@ -198,8 +219,8 @@ namespace Rhydon
             CB_Species.SelectedValue = (int)pk1.Species;
 
             TB_TID.Text = pk1.TID.ToString("00000");
-            TB_OT.Text = RBY_Encoding.GetString(pk1.OT_Name);
-            TB_Nickname.Text = RBY_Encoding.GetString(pk1.Nickname);
+            TB_OT.Text = RBY_Encoding.GetString(pk1.OT_Name, JP_Mode);
+            TB_Nickname.Text = RBY_Encoding.GetString(pk1.Nickname, JP_Mode);
 
             TB_HPDV.Text = pk1.DV_HP.ToString();
             TB_ATKDV.Text = pk1.DV_ATK.ToString();
@@ -244,8 +265,8 @@ namespace Rhydon
             uint EXP = Tables.getEXP(Level, Species);
             TB_EXP.Text = EXP.ToString();
 
-            if (TB_Nickname.Text == Tables.ID_To_Name[pk1.Species].ToUpper().Replace('♀', (char)RBY_Encoding.CHAR_FEM_NUM).Replace('♂', (char)RBY_Encoding.CHAR_MAL_NUM))
-                TB_Nickname.Text = Tables.ID_To_Name[Species].ToUpper().Replace('♀', (char)RBY_Encoding.CHAR_FEM_NUM).Replace('♂', (char)RBY_Encoding.CHAR_MAL_NUM);
+            if (TB_Nickname.Text == (JP_Mode ? Tables.ID_To_JP_Name : Tables.ID_To_Name)[pk1.Species].ToUpper().Replace('♀', (char)RBY_Encoding.CHAR_FEM_NUM).Replace('♂', (char)RBY_Encoding.CHAR_MAL_NUM))
+                TB_Nickname.Text = (JP_Mode ? Tables.ID_To_JP_Name : Tables.ID_To_Name)[Species].ToUpper().Replace('♀', (char)RBY_Encoding.CHAR_FEM_NUM).Replace('♂', (char)RBY_Encoding.CHAR_MAL_NUM);
 
             pk1.Species = (byte)Species;
 
@@ -289,8 +310,8 @@ namespace Rhydon
             byte[] dragdata = pk1_wrapper.GetBytes();
 
 
-            string filename = RBY_Encoding.GetString(pk1.Nickname) + " - " +
-                              RBY_Encoding.GetString(pk1.OT_Name) + ".pk1";
+            string filename = RBY_Encoding.GetString(pk1.Nickname, JP_Mode) + " - " +
+                              RBY_Encoding.GetString(pk1.OT_Name, JP_Mode) + (JP_Mode ? ".jpk1" : ".pk1");
 
             string newfile = Path.Combine(Path.GetTempPath(), Util.CleanFileName(filename));
             try
@@ -386,10 +407,10 @@ namespace Rhydon
             if (changingFields || !initializedFields) return;
             changingFields = true;
 
-            if (!RBY_Encoding.Validate(TB_OT.Text))
-                TB_OT.Text = RBY_Encoding.FixString(TB_OT.Text);
+            if (!RBY_Encoding.Validate(TB_OT.Text, JP_Mode))
+                TB_OT.Text = RBY_Encoding.FixString(TB_OT.Text, JP_Mode);
 
-            pk1.OT_Name = RBY_Encoding.GetBytes(TB_OT.Text);
+            pk1.OT_Name = RBY_Encoding.GetBytes(TB_OT.Text, JP_Mode);
             changingFields = false;
         }
 
@@ -398,10 +419,10 @@ namespace Rhydon
             if (changingFields || !initializedFields) return;
             changingFields = true;
 
-            if (!RBY_Encoding.Validate(TB_Nickname.Text))
-                TB_Nickname.Text = RBY_Encoding.FixString(TB_Nickname.Text);
+            if (!RBY_Encoding.Validate(TB_Nickname.Text, JP_Mode))
+                TB_Nickname.Text = RBY_Encoding.FixString(TB_Nickname.Text, JP_Mode);
 
-            pk1.Nickname = RBY_Encoding.GetBytes(TB_Nickname.Text);
+            pk1.Nickname = RBY_Encoding.GetBytes(TB_Nickname.Text, JP_Mode);
             changingFields = false;
         }
 
@@ -421,12 +442,13 @@ namespace Rhydon
             OpenFileDialog ofd = new OpenFileDialog
             {
                 Filter = "PK1 File|*.pk1" +
+                         "|JPK1 File|*.jpk1" +
                          "|SAV File|*.sav" +
                          "|DAT File|*.dat" +
                          "|BIN File|*.bin" +
                          "|All Files|*.*",
                 RestoreDirectory = true,
-                FilterIndex = 5,
+                FilterIndex = 6,
             };
 
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -453,13 +475,13 @@ namespace Rhydon
                 {
                     try
                     {
-                        PokemonList empty = new PokemonList((byte[]) PokemonList.EMPTY_LIST.Clone())
+                        PokemonList empty = new PokemonList((byte[])PokemonList.EMPTY_LIST.Clone())
                         {
-                            [0] = {OT_Name = RBY_Encoding.GetBytes("Rhydon")},
-                            [0] = {Nickname = RBY_Encoding.GetBytes("RHYDON")},
-                            [0] = {TID = 12345},
-                            [0] = {Species = 1},
-                            [0] = {Level = 1}
+                            [0] = { OT_Name = RBY_Encoding.GetBytes(JP_Mode ? "サイドン" : "Rhydon", JP_Mode) },
+                            [0] = { Nickname = RBY_Encoding.GetBytes(JP_Mode ? "サイドン" : "RHYDON", JP_Mode) },
+                            [0] = { TID = 12345 },
+                            [0] = { Species = 1 },
+                            [0] = { Level = 1 }
                         };
 
                         openFile(empty.GetBytes(), path, ext);
@@ -478,11 +500,39 @@ namespace Rhydon
             {
                 if (new[] { ".pk1", "" }.Contains(ext) && input[0] == 1 && input[2] == 0xFF && input[1] == input[3])
                 {
-                    PopulateFields(new PokemonList(input)[0]);
+                    if (!saveLoaded && JP_Mode)
+                    {
+                        JP_Mode = false;
+                        pk1_wrapper = new PokemonList(PokemonList.CapacityType.Single, JP_Mode);
+                    }
+                    if (!JP_Mode)
+                        PopulateFields(new PokemonList(input)[0]);
+                    else
+                        Util.Error("Cannot open a PK1 with a JP save open.");
                 }
                 else
                 {
                     Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .pk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
+                }
+            }
+            else if (input.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single, true))
+            {
+                if (new[] { ".jpk1", "" }.Contains(ext) && input[0] == 1 && input[2] == 0xFF && input[1] == input[3])
+                {
+
+                    if (!saveLoaded && !JP_Mode)
+                    {
+                        JP_Mode = true;
+                        pk1_wrapper = new PokemonList(PokemonList.CapacityType.Single, JP_Mode);
+                    }
+                    if (JP_Mode)
+                        PopulateFields(new PokemonList(input, PokemonList.CapacityType.Single, true)[0]);
+                    else
+                        Util.Error("Cannot open a JPK1 with a non-JP save open.");
+                }
+                else
+                {
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Only valid .jpk1/.bin supported.", string.Format($"File Loaded:{Environment.NewLine}{path}"));
                 }
             }
             else if (input.Length == 0x8000 || input.Length == 0x802C)
@@ -494,14 +544,52 @@ namespace Rhydon
                 if (input.Length == 0x802C) // Support Emulator saves
                     Array.Resize(ref input, 0x8000);
                 saveLoaded = Menu_ExportSAV.Enabled = false;
-                PopulateFields(new SAV1(input)
+                Menu_JapaneseMode.Enabled = true;
+                foreach (TabPage tp in tabBoxMulti.TabPages)
+                    tp.Enabled = false;
+                if (SAV1.IsAmerican(input))
                 {
-                    FilePath = Path.GetDirectoryName(path),
-                    FileName = Path.GetFileName(path)
-                });
+                    if (JP_Mode)
+                    {
+                        JP_Mode = false;
+                        pk1_wrapper = new PokemonList(PokemonList.CapacityType.Single, JP_Mode);
+                        InitializeFields();
+                    }
+                    CB_BoxSelect.Items.Clear();
+                    CB_BoxSelect.Items.AddRange(Enumerable.Range(1, 12).Select(d => string.Format("Box {0}", d)).ToArray());
+                    PopulateFields(new USAV1(input)
+                    {
+                        FilePath = Path.GetDirectoryName(path),
+                        FileName = Path.GetFileName(path)
+                    });
+                    SetStringLengths();
+                }
+                else if (SAV1.IsJapanese(input))
+                {
+                    if (!JP_Mode)
+                    {
+                        JP_Mode = true;
+                        pk1_wrapper = new PokemonList(PokemonList.CapacityType.Single, JP_Mode);
+                        InitializeFields();
+                    }
+                    CB_BoxSelect.Items.Clear();
+                    CB_BoxSelect.Items.AddRange(Enumerable.Range(1, 8).Select(d => string.Format("Box {0}", d)).ToArray());
+                    PopulateFields(new JSAV1(input)
+                    {
+                        FilePath = Path.GetDirectoryName(path),
+                        FileName = Path.GetFileName(path)
+                    });
+                    SetStringLengths();
+                }
+                else
+                {
+                    Util.Error("Unable to recognize file." + Environment.NewLine + "Save file may be corrupted.");
+                    return;
+                }
                 foreach (TabPage tp in tabBoxMulti.TabPages)
                     tp.Enabled = true;
                 saveLoaded = Menu_ExportSAV.Enabled = true;
+                Menu_JapaneseMode.Enabled = false;
 
                 // Indicate audibly the save is loaded
                 SystemSounds.Beep.Play();
@@ -520,9 +608,11 @@ namespace Rhydon
             SaveFileDialog sfd = new SaveFileDialog
             {
                 Filter = "PK1 File|*.pk1" +
+                         "|JPK1 File|*.jpk1" +
                          "|BIN File|*.bin" +
                          "|All Files|*.*",
-                DefaultExt = "pk1",
+                DefaultExt = JP_Mode ? "jpk1" : "pk1",
+                FilterIndex = JP_Mode ? 2 : 1,
                 FileName = TB_Nickname.Text + " - " + TB_OT.Text
             };
             if (sfd.ShowDialog() != DialogResult.OK) return;
@@ -541,13 +631,13 @@ namespace Rhydon
         private void clickBoxRight(object sender, EventArgs e)
         {
             sav.CurrentBox = PLC_Box.pokemonlist;
-            CB_BoxSelect.SelectedIndex = (CB_BoxSelect.SelectedIndex + 1) % 12;
+            CB_BoxSelect.SelectedIndex = (CB_BoxSelect.SelectedIndex + 1) % sav.NUM_BOXES;
         }
 
         private void clickBoxLeft(object sender, EventArgs e)
         {
             sav.CurrentBox = PLC_Box.pokemonlist;
-            CB_BoxSelect.SelectedIndex = (CB_BoxSelect.SelectedIndex + 11) % 12;
+            CB_BoxSelect.SelectedIndex = (CB_BoxSelect.SelectedIndex + (sav.NUM_BOXES - 1)) % sav.NUM_BOXES;
         }
 
         private void getBox(object sender, EventArgs e)
@@ -556,7 +646,6 @@ namespace Rhydon
                 sav.CurrentBox = PLC_Box.pokemonlist;
             sav.Current_Box_Index = CB_BoxSelect.SelectedIndex;
             PLC_Box.SetList(sav.CurrentBox);
-            TB_BoxIndex.Text = (sav.Current_Box_Index + 1).ToString("00");
         }
 
         private void clickExportSav(object sender, EventArgs e)
@@ -607,8 +696,8 @@ namespace Rhydon
             if (changingFields || !initializedFields) return;
             changingFields = true;
 
-            if (!RBY_Encoding.Validate(TB_SaveName.Text))
-                TB_SaveName.Text = RBY_Encoding.FixString(TB_SaveName.Text);
+            if (!RBY_Encoding.Validate(TB_SaveName.Text, JP_Mode))
+                TB_SaveName.Text = RBY_Encoding.FixString(TB_SaveName.Text, JP_Mode);
 
             sav.OT_Name = TB_SaveName.Text;
             changingFields = false;
@@ -619,8 +708,8 @@ namespace Rhydon
             if (changingFields || !initializedFields) return;
             changingFields = true;
 
-            if (!RBY_Encoding.Validate(TB_Rival.Text))
-                TB_Rival.Text = RBY_Encoding.FixString(TB_Rival.Text);
+            if (!RBY_Encoding.Validate(TB_Rival.Text, JP_Mode))
+                TB_Rival.Text = RBY_Encoding.FixString(TB_Rival.Text, JP_Mode);
 
             sav.Rival_Name = TB_Rival.Text;
             changingFields = false;
@@ -757,7 +846,32 @@ namespace Rhydon
             MT_Minutes.Text = Mins.ToString();
             MT_Seconds.Text = Secs.ToString();
 
-            sav.Time_Played = new[] {Hours, Mins, Secs};
+            sav.Time_Played = new[] { Hours, Mins, Secs };
+
+            changingFields = false;
+        }
+
+        private void toggleJapaneseMode(object sender, EventArgs e)
+        {
+            if (saveLoaded)
+            {
+                Util.Error("You can't toggle Japanese mode with a save loaded!");
+                Menu_JapaneseMode.Enabled = !saveLoaded;
+            }
+            JP_Mode = !JP_Mode;
+            pk1_wrapper = new PokemonList(PokemonList.CapacityType.Single, JP_Mode);
+            InitializeFields();
+            SetStringLengths();
+        }
+
+        private void updateSaveTID(object sender, EventArgs e)
+        {
+            if (changingFields || !initializedFields) return;
+
+            changingFields = true;
+            if (Util.ToUInt32(TB_SaveTID.Text) > ushort.MaxValue) TB_SaveTID.Text = "65535";
+
+            sav.TID = (ushort)Util.ToUInt32(TB_SaveTID.Text);
 
             changingFields = false;
         }

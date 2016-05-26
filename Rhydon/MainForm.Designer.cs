@@ -36,6 +36,7 @@
             this.Menu_Modify = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_ModifyDex = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_UseOldSprites = new System.Windows.Forms.ToolStripMenuItem();
+            this.Menu_JapaneseMode = new System.Windows.Forms.ToolStripMenuItem();
             this.Tab_Main = new System.Windows.Forms.TabPage();
             this.GB_CurrentMoves = new System.Windows.Forms.GroupBox();
             this.TB_PP4 = new System.Windows.Forms.MaskedTextBox();
@@ -97,8 +98,6 @@
             this.mnuDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.tabBoxMulti = new System.Windows.Forms.TabControl();
             this.Tab_Trainer = new System.Windows.Forms.TabPage();
-            this.TB_BoxIndex = new System.Windows.Forms.MaskedTextBox();
-            this.Label_CurrentBox = new System.Windows.Forms.Label();
             this.GB_TimePlayed = new System.Windows.Forms.GroupBox();
             this.MT_Seconds = new System.Windows.Forms.MaskedTextBox();
             this.MT_Hours = new System.Windows.Forms.MaskedTextBox();
@@ -129,6 +128,8 @@
             this.L_Party = new System.Windows.Forms.Label();
             this.L_Save = new System.Windows.Forms.Label();
             this.PB_DragOut = new System.Windows.Forms.PictureBox();
+            this.TB_SaveTID = new System.Windows.Forms.MaskedTextBox();
+            this.LBL_SaveTID = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.Tab_Main.SuspendLayout();
             this.GB_CurrentMoves.SuspendLayout();
@@ -207,7 +208,8 @@
             // 
             this.Menu_Options.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Menu_Modify,
-            this.Menu_UseOldSprites});
+            this.Menu_UseOldSprites,
+            this.Menu_JapaneseMode});
             this.Menu_Options.Name = "Menu_Options";
             this.Menu_Options.Size = new System.Drawing.Size(61, 20);
             this.Menu_Options.Text = "Options";
@@ -217,7 +219,7 @@
             this.Menu_Modify.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Menu_ModifyDex});
             this.Menu_Modify.Name = "Menu_Modify";
-            this.Menu_Modify.Size = new System.Drawing.Size(150, 22);
+            this.Menu_Modify.Size = new System.Drawing.Size(194, 22);
             this.Menu_Modify.Text = "Set to SAV";
             // 
             // Menu_ModifyDex
@@ -233,9 +235,16 @@
             // Menu_UseOldSprites
             // 
             this.Menu_UseOldSprites.Name = "Menu_UseOldSprites";
-            this.Menu_UseOldSprites.Size = new System.Drawing.Size(150, 22);
+            this.Menu_UseOldSprites.Size = new System.Drawing.Size(194, 22);
             this.Menu_UseOldSprites.Text = "Use old sprites";
             this.Menu_UseOldSprites.Click += new System.EventHandler(this.toggleUseOldSprites);
+            // 
+            // Menu_JapaneseMode
+            // 
+            this.Menu_JapaneseMode.Name = "Menu_JapaneseMode";
+            this.Menu_JapaneseMode.Size = new System.Drawing.Size(194, 22);
+            this.Menu_JapaneseMode.Text = "Toggle Japanese Mode";
+            this.Menu_JapaneseMode.Click += new System.EventHandler(this.toggleJapaneseMode);
             // 
             // Tab_Main
             // 
@@ -914,8 +923,8 @@
             // 
             // Tab_Trainer
             // 
-            this.Tab_Trainer.Controls.Add(this.TB_BoxIndex);
-            this.Tab_Trainer.Controls.Add(this.Label_CurrentBox);
+            this.Tab_Trainer.Controls.Add(this.TB_SaveTID);
+            this.Tab_Trainer.Controls.Add(this.LBL_SaveTID);
             this.Tab_Trainer.Controls.Add(this.GB_TimePlayed);
             this.Tab_Trainer.Controls.Add(this.TB_PikaFriend);
             this.Tab_Trainer.Controls.Add(this.Label_PikaFriend);
@@ -934,26 +943,6 @@
             this.Tab_Trainer.TabIndex = 3;
             this.Tab_Trainer.Text = "Trainer";
             this.Tab_Trainer.UseVisualStyleBackColor = true;
-            // 
-            // TB_BoxIndex
-            // 
-            this.TB_BoxIndex.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TB_BoxIndex.Enabled = false;
-            this.TB_BoxIndex.Location = new System.Drawing.Point(106, 150);
-            this.TB_BoxIndex.Mask = "00";
-            this.TB_BoxIndex.Name = "TB_BoxIndex";
-            this.TB_BoxIndex.Size = new System.Drawing.Size(22, 20);
-            this.TB_BoxIndex.TabIndex = 62;
-            this.TB_BoxIndex.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // Label_CurrentBox
-            // 
-            this.Label_CurrentBox.Location = new System.Drawing.Point(6, 152);
-            this.Label_CurrentBox.Name = "Label_CurrentBox";
-            this.Label_CurrentBox.Size = new System.Drawing.Size(101, 13);
-            this.Label_CurrentBox.TabIndex = 61;
-            this.Label_CurrentBox.Text = "Current Box:";
-            this.Label_CurrentBox.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // GB_TimePlayed
             // 
@@ -1277,6 +1266,26 @@
             this.PB_DragOut.TabIndex = 53;
             this.PB_DragOut.TabStop = false;
             // 
+            // TB_SaveTID
+            // 
+            this.TB_SaveTID.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.TB_SaveTID.Location = new System.Drawing.Point(88, 151);
+            this.TB_SaveTID.Mask = "00000";
+            this.TB_SaveTID.Name = "TB_SaveTID";
+            this.TB_SaveTID.Size = new System.Drawing.Size(40, 20);
+            this.TB_SaveTID.TabIndex = 61;
+            this.TB_SaveTID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.TB_SaveTID.TextChanged += new System.EventHandler(this.updateSaveTID);
+            // 
+            // LBL_SaveTID
+            // 
+            this.LBL_SaveTID.Location = new System.Drawing.Point(46, 153);
+            this.LBL_SaveTID.Name = "LBL_SaveTID";
+            this.LBL_SaveTID.Size = new System.Drawing.Size(40, 13);
+            this.LBL_SaveTID.TabIndex = 62;
+            this.LBL_SaveTID.Text = "TID:";
+            this.LBL_SaveTID.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1422,10 +1431,11 @@
         private System.Windows.Forms.Button B_Inventory;
         private System.Windows.Forms.Button B_Pokedex;
         private System.Windows.Forms.Button B_Options;
-        private System.Windows.Forms.MaskedTextBox TB_BoxIndex;
-        private System.Windows.Forms.Label Label_CurrentBox;
         private System.Windows.Forms.ToolStripMenuItem Menu_UseOldSprites;
         private System.Windows.Forms.PictureBox PB_DragOut;
+        private System.Windows.Forms.ToolStripMenuItem Menu_JapaneseMode;
+        private System.Windows.Forms.MaskedTextBox TB_SaveTID;
+        private System.Windows.Forms.Label LBL_SaveTID;
     }
 }
 

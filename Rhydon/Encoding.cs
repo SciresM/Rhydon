@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Rhydon
@@ -12,7 +14,14 @@ namespace Rhydon
         internal const byte CHAR_MAL_NUM = 0x7E;
         internal const byte CHAR_FEM_NUM = 0x60;
 
-        public static string GetString(byte[] arr)
+        public static string GetString(byte[] arr, bool JP)
+        {
+            if (JP)
+                return GetJPString(arr);
+            return GetAmericanString(arr);
+        }
+
+        public static string GetAmericanString(byte[] arr)
         {
             StringBuilder sb = new StringBuilder();
             foreach (byte b in arr)
@@ -28,21 +37,80 @@ namespace Rhydon
             return sb.ToString();
         }
 
-        public static byte[] GetBytes(string s)
+        public static string GetJPString(byte[] arr)
         {
-            if (!Validate(s))
-                s = FixString(s);
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in arr)
+            {
+                char c = (JP_RBY_TO_CHAR.ContainsKey(b)) ? JP_RBY_TO_CHAR[b] : (char)RBY_To_ASCII[b];
+                if (c == 0)
+                    return sb.ToString();
+                if (c == CHAR_TRAINER)
+                    sb.Append("トレーナー");
+                else
+                    sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        public static byte[] GetBytes(string s, bool JP)
+        {
+            if (JP)
+                return GetJPBytes(s);
+            return GetAmericanBytes(s);
+        }
+
+        public static byte[] GetAmericanBytes(string s)
+        {
+            s = s.Replace('♀', (char)CHAR_FEM_NUM).Replace('♂', (char)CHAR_MAL_NUM);
+            if (!Validate(s, false))
+                s = FixString(s, false);
             if (s == "[TRAINER]")
-                return new[] { ASCII_To_RBY[CHAR_TRAINER] };
+                return new[] { ASCII_To_RBY[CHAR_TRAINER], (byte)0x50 };
             return s.Select(c => ASCII_To_RBY[c]).Concat(new[] { (byte)0x50 }).ToArray();
         }
 
-        public static bool Validate(string s)
+        public static byte[] GetJPBytes(string s)
         {
+            s = s.Replace('♀', (char)CHAR_FEM_NUM).Replace('♂', (char)CHAR_MAL_NUM);
+            if (!Validate(s, true))
+                s = FixString(s, true);
+            if (s == "トレーナー")
+                return new[] { ASCII_To_RBY[CHAR_TRAINER], (byte)0x50 };
+            return s.Select(c => CHAR_TO_JP_RBY.ContainsKey(c) ? CHAR_TO_JP_RBY[c] : ASCII_To_RBY[(byte)c]).Concat(new[] { (byte)0x50 }).ToArray();
+        }
+
+        public static bool Validate(string s, bool JP)
+        {
+            if (JP)
+                return s.All(c => CHAR_TO_JP_RBY.ContainsKey(c) || c == CHAR_FEM_NUM || c == CHAR_MAL_NUM);
             return !s.Any(c => c > 0xFF || ASCII_To_RBY[c] == 0);
         }
 
-        public static string FixString(string s)
+        public static string FixString(string s, bool JP)
+        {
+            if (JP)
+                return FixJPString(s);
+            return FixAmericanString(s);
+        }
+
+        public static string FixJPString(string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            s = s.Replace('♀', (char)CHAR_FEM_NUM).Replace('♂', (char)CHAR_MAL_NUM);
+            foreach (char c in s)
+            {
+                if (CHAR_TO_JP_RBY.ContainsKey(c) || c == CHAR_FEM_NUM || c == CHAR_MAL_NUM)
+                    sb.Append(c);
+                else
+                {
+                    Console.WriteLine("Removing invalid character 0x{0} ({1})", ((int) c).ToString("X4"), c);
+                }
+            }
+            return sb.ToString();
+        }
+
+        public static string FixAmericanString(string s)
         {
             StringBuilder sb = new StringBuilder();
             s = s.Replace('♀', (char)CHAR_FEM_NUM).Replace('♂', (char)CHAR_MAL_NUM);
@@ -573,5 +641,314 @@ namespace Rhydon
 			(byte) '9'  /* 0xFF */
 		};
         #endregion
+
+        #region JP Character Dictionaries
+        static Dictionary<char, byte> CHAR_TO_JP_RBY = new Dictionary<char, byte>(){
+            {'ガ', 0x05},
+            {'ギ', 0x06},
+            {'グ', 0x07},
+            {'ゲ', 0x08},
+            {'ゴ', 0x09},
+            {'ザ', 0x0A},
+            {'ジ', 0x0B},
+            {'ズ', 0x0C},
+            {'ゼ', 0x0D},
+            {'ゾ', 0x0E},
+            {'ダ', 0x0F},
+            {'ヂ', 0x10},
+            {'ヅ', 0x11},
+            {'デ', 0x12},
+            {'ド', 0x13},
+            {'バ', 0x19},
+            {'ビ', 0x1A},
+            {'ブ', 0x1B},
+            {'ボ', 0x1C},
+            {'が', 0x26},
+            {'ぎ', 0x27},
+            {'ぐ', 0x28},
+            {'げ', 0x29},
+            {'ご', 0x2A},
+            {'ざ', 0x2B},
+            {'じ', 0x2C},
+            {'ず', 0x2D},
+            {'ぜ', 0x2E},
+            {'ぞ', 0x2F},
+            {'だ', 0x30},
+            {'ぢ', 0x31},
+            {'づ', 0x32},
+            {'で', 0x33},
+            {'ど', 0x34},
+            {'ば', 0x3A},
+            {'び', 0x3B},
+            {'ぶ', 0x3C},
+            {'べ', 0x3D},
+            {'ぼ', 0x3E},
+            {'パ', 0x40},
+            {'ピ', 0x41},
+            {'プ', 0x42},
+            {'ポ', 0x43},
+            {'ぱ', 0x44},
+            {'ぴ', 0x45},
+            {'ぷ', 0x46},
+            {'ぺ', 0x47},
+            {'ぽ', 0x48},
+            {'ア', 0x80},
+            {'イ', 0x81},
+            {'ウ', 0x82},
+            {'エ', 0x83},
+            {'ォ', 0x84},
+            {'カ', 0x85},
+            {'キ', 0x86},
+            {'ク', 0x87},
+            {'ケ', 0x88},
+            {'コ', 0x89},
+            {'サ', 0x8A},
+            {'シ', 0x8B},
+            {'ス', 0x8C},
+            {'セ', 0x8D},
+            {'ソ', 0x8E},
+            {'タ', 0x8F},
+            {'チ', 0x90},
+            {'ツ', 0x91},
+            {'テ', 0x92},
+            {'ト', 0x93},
+            {'ナ', 0x94},
+            {'ニ', 0x95},
+            {'ヌ', 0x96},
+            {'ネ', 0x97},
+            {'ノ', 0x98},
+            {'ハ', 0x99},
+            {'ヒ', 0x9A},
+            {'フ', 0x9B},
+            {'ホ', 0x9C},
+            {'マ', 0x9D},
+            {'ミ', 0x9E},
+            {'ム', 0x9F},
+            {'メ', 0xA0},
+            {'モ', 0xA1},
+            {'ヤ', 0xA2},
+            {'ユ', 0xA3},
+            {'ヨ', 0xA4},
+            {'ラ', 0xA5},
+            {'ル', 0xA6},
+            {'レ', 0xA7},
+            {'ロ', 0xA8},
+            {'ワ', 0xA9},
+            {'ヲ', 0xAA},
+            {'ン', 0xAB},
+            {'ッ', 0xAC},
+            {'ャ', 0xAD},
+            {'ュ', 0xAE},
+            {'ョ', 0xAF},
+            {'ィ', 0xB0},
+            {'あ', 0xB1},
+            {'い', 0xB2},
+            {'う', 0xB3},
+            {'え', 0xB4},
+            {'お', 0xB5},
+            {'か', 0xB6},
+            {'き', 0xB7},
+            {'く', 0xB8},
+            {'け', 0xB9},
+            {'こ', 0xBA},
+            {'さ', 0xBB},
+            {'し', 0xBC},
+            {'す', 0xBD},
+            {'せ', 0xBE},
+            {'そ', 0xBF},
+            {'た', 0xC0},
+            {'ち', 0xC1},
+            {'つ', 0xC2},
+            {'て', 0xC3},
+            {'と', 0xC4},
+            {'な', 0xC5},
+            {'に', 0xC6},
+            {'ぬ', 0xC7},
+            {'ね', 0xC8},
+            {'の', 0xC9},
+            {'は', 0xCA},
+            {'ひ', 0xCB},
+            {'ふ', 0xCC},
+            {'へ', 0xCD},
+            {'ほ', 0xCE},
+            {'ま', 0xCF},
+            {'み', 0xD0},
+            {'む', 0xD1},
+            {'め', 0xD2},
+            {'も', 0xD3},
+            {'や', 0xD4},
+            {'ゆ', 0xD5},
+            {'よ', 0xD6},
+            {'ら', 0xD7},
+            {'り', 0xD8},
+            {'る', 0xD9},
+            {'れ', 0xDA},
+            {'ろ', 0xDB},
+            {'わ', 0xDC},
+            {'を', 0xDD},
+            {'ん', 0xDE},
+            {'っ', 0xDF},
+            {'ゃ', 0xE0},
+            {'ゅ', 0xE1},
+            {'ょ', 0xE2},
+            {'ー', 0xE3},
+            {'ァ', 0xE9},
+        };
+
+        static Dictionary<byte, char> JP_RBY_TO_CHAR = new Dictionary<byte, char>(){
+            {0x05, 'ガ'},
+            {0x06, 'ギ'},
+            {0x07, 'グ'},
+            {0x08, 'ゲ'},
+            {0x09, 'ゴ'},
+            {0x0A, 'ザ'},
+            {0x0B, 'ジ'},
+            {0x0C, 'ズ'},
+            {0x0D, 'ゼ'},
+            {0x0E, 'ゾ'},
+            {0x0F, 'ダ'},
+            {0x10, 'ヂ'},
+            {0x11, 'ヅ'},
+            {0x12, 'デ'},
+            {0x13, 'ド'},
+            {0x19, 'バ'},
+            {0x1A, 'ビ'},
+            {0x1B, 'ブ'},
+            {0x1C, 'ボ'},
+            {0x26, 'が'},
+            {0x27, 'ぎ'},
+            {0x28, 'ぐ'},
+            {0x29, 'げ'},
+            {0x2A, 'ご'},
+            {0x2B, 'ざ'},
+            {0x2C, 'じ'},
+            {0x2D, 'ず'},
+            {0x2E, 'ぜ'},
+            {0x2F, 'ぞ'},
+            {0x30, 'だ'},
+            {0x31, 'ぢ'},
+            {0x32, 'づ'},
+            {0x33, 'で'},
+            {0x34, 'ど'},
+            {0x3A, 'ば'},
+            {0x3B, 'び'},
+            {0x3C, 'ぶ'},
+            {0x3D, 'べ'},
+            {0x3E, 'ぼ'},
+            {0x40, 'パ'},
+            {0x41, 'ピ'},
+            {0x42, 'プ'},
+            {0x43, 'ポ'},
+            {0x44, 'ぱ'},
+            {0x45, 'ぴ'},
+            {0x46, 'ぷ'},
+            {0x47, 'ぺ'},
+            {0x48, 'ぽ'},
+            {0x50, '\0'},
+            {0x80, 'ア'},
+            {0x81, 'イ'},
+            {0x82, 'ウ'},
+            {0x83, 'エ'},
+            {0x84, 'ォ'},
+            {0x85, 'カ'},
+            {0x86, 'キ'},
+            {0x87, 'ク'},
+            {0x88, 'ケ'},
+            {0x89, 'コ'},
+            {0x8A, 'サ'},
+            {0x8B, 'シ'},
+            {0x8C, 'ス'},
+            {0x8D, 'セ'},
+            {0x8E, 'ソ'},
+            {0x8F, 'タ'},
+            {0x90, 'チ'},
+            {0x91, 'ツ'},
+            {0x92, 'テ'},
+            {0x93, 'ト'},
+            {0x94, 'ナ'},
+            {0x95, 'ニ'},
+            {0x96, 'ヌ'},
+            {0x97, 'ネ'},
+            {0x98, 'ノ'},
+            {0x99, 'ハ'},
+            {0x9A, 'ヒ'},
+            {0x9B, 'フ'},
+            {0x9C, 'ホ'},
+            {0x9D, 'マ'},
+            {0x9E, 'ミ'},
+            {0x9F, 'ム'},
+            {0xA0, 'メ'},
+            {0xA1, 'モ'},
+            {0xA2, 'ヤ'},
+            {0xA3, 'ユ'},
+            {0xA4, 'ヨ'},
+            {0xA5, 'ラ'},
+            {0xA6, 'ル'},
+            {0xA7, 'レ'},
+            {0xA8, 'ロ'},
+            {0xA9, 'ワ'},
+            {0xAA, 'ヲ'},
+            {0xAB, 'ン'},
+            {0xAC, 'ッ'},
+            {0xAD, 'ャ'},
+            {0xAE, 'ュ'},
+            {0xAF, 'ョ'},
+            {0xB0, 'ィ'},
+            {0xB1, 'あ'},
+            {0xB2, 'い'},
+            {0xB3, 'う'},
+            {0xB4, 'え'},
+            {0xB5, 'お'},
+            {0xB6, 'か'},
+            {0xB7, 'き'},
+            {0xB8, 'く'},
+            {0xB9, 'け'},
+            {0xBA, 'こ'},
+            {0xBB, 'さ'},
+            {0xBC, 'し'},
+            {0xBD, 'す'},
+            {0xBE, 'せ'},
+            {0xBF, 'そ'},
+            {0xC0, 'た'},
+            {0xC1, 'ち'},
+            {0xC2, 'つ'},
+            {0xC3, 'て'},
+            {0xC4, 'と'},
+            {0xC5, 'な'},
+            {0xC6, 'に'},
+            {0xC7, 'ぬ'},
+            {0xC8, 'ね'},
+            {0xC9, 'の'},
+            {0xCA, 'は'},
+            {0xCB, 'ひ'},
+            {0xCC, 'ふ'},
+            {0xCD, 'へ'},
+            {0xCE, 'ほ'},
+            {0xCF, 'ま'},
+            {0xD0, 'み'},
+            {0xD1, 'む'},
+            {0xD2, 'め'},
+            {0xD3, 'も'},
+            {0xD4, 'や'},
+            {0xD5, 'ゆ'},
+            {0xD6, 'よ'},
+            {0xD7, 'ら'},
+            {0xD8, 'り'},
+            {0xD9, 'る'},
+            {0xDA, 'れ'},
+            {0xDB, 'ろ'},
+            {0xDC, 'わ'},
+            {0xDD, 'を'},
+            {0xDE, 'ん'},
+            {0xDF, 'っ'},
+            {0xE0, 'ゃ'},
+            {0xE1, 'ゅ'},
+            {0xE2, 'ょ'},
+            {0xE3, 'ー'},
+            {0xE9, 'ァ'},
+};
+        #endregion
     }
+
+
 }

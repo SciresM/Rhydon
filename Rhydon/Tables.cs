@@ -113,6 +113,35 @@ namespace Rhydon
             "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno"
         };
 
+        public static readonly string[] ID_To_JP_Name =
+        {
+            "Missingno", "サイドン", "ガルーラ", "ニドラン♂", "ピッピ", "ォニスズメ", "ビりりダマ", "ニドキング", "ヤドラン", "フシギソウ", "ナッシー", "へロりンガ",
+            "タマタマ", "へトへター", "ゲンガー", "ニドラン♀", "ニドクイン", "カラカラ", "サイホーン", "ラプラス", "ウインディ", "ミュウ", "ギャラドス", "シエルダー",
+            "メノクラゲ", "ゴース", "ストライク", "ヒトデマン", "カメックス", "カイロス", "モンジャラ", "Missingno", "Missingno", "ガーディ", "イワーク",
+            "ォニドりル", "ポッポ", "ヤドン", "ユンゲラー", "ゴローン", "ラッキー", "ゴーりキー", "バりヤード", "サワムラー", "エビワラー", "アーボック", "パラセクト", "コダック",
+            "スりープ", "ゴローニャ", "Missingno", "ブーバー", "Missingno", "エレブー", "レアコイル", "ドガース", "Missingno", "マンキー", "パウワウ",
+            "ディグダ", "ケンタロス", "Missingno", "Missingno", "Missingno", "カモネギ", "コンパン", "カイりュー", "Missingno", "Missingno",
+            "Missingno", "ドードー", "ニョロモ", "ルージュラ", "ファイヤー", "フりーザー", "サンダー", "メタモン", "ニャース", "クラブ", "Missingno",
+            "Missingno", "Missingno", "ロコン", "キュウコン", "ピカチュウ", "ライチュウ", "Missingno", "Missingno", "ミニりュウ", "ハクりュー",
+            "カブト", "カブトプス", "タッツー", "シードラ", "Missingno", "Missingno", "サンド", "サンドパン", "ォムナイト", "ォムスター", "プりン", "プクりン",
+            "イーブイ", "ブースター", "サンダース", "シャワーズ", "ワンりキー", "ズバット", "アーボ", "パラス", "ニョロゾ", "ニョロボン", "ビードル", "コクーン", "スピアー",
+            "Missingno", "ドードりォ", "ォコりザル", "ダグトりォ", "モルフォン", "ジュゴン", "Missingno", "Missingno", "キャタピー", "トランセル", "バタフりー",
+            "カイりキー", "Missingno", "ゴルダック", "スりーパー", "ゴルバット", "ミュウツー", "カビゴン", "コイキング", "Missingno", "Missingno", "へトへトン",
+            "Missingno", "キングラー", "パルシエン", "Missingno", "マルマイン", "ピクシー", "マタドガス", "へルシアン", "ガラガラ", "Missingno", "ゴースト",
+            "ケーシィ", "フーディン", "ピジョン", "ピジョット", "スターミー", "フシギダネ", "フシギバナ", "ドククラゲ", "Missingno", "トサキント", "アズマォウ",
+            "Missingno", "Missingno", "Missingno", "Missingno", "ポニータ", "ギャロップ", "コラッタ", "ラッタ", "ニドりーノ", "ニドりーナ",
+            "イシツブテ", "ポりゴン", "プテラ", "Missingno", "コイル", "Missingno", "Missingno", "ヒトカゲ", "ゼニガメ", "りザード", "カメール",
+            "りザードン", "Missingno", "Missingno", "Missingno", "Missingno", "ナゾノクサ", "クサイハナ", "ラフレシア", "マダツボミ", "ウツドン",
+            "ウツボット", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno",
+            "Missingno", "Missingno", "Missingno", "Missingno", "Missingno", "Missingno"
+        };
+
         public static readonly string[] ID_To_MoveName =
         {
             "(None)", "Pound", "Karate Chop", "Doubleslap", "Comet Punch", "Mega Punch",

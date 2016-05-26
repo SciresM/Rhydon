@@ -20,10 +20,16 @@ namespace Rhydon
 
         public PK1 Clone()
         {
-            PK1 new_pk1 = new PK1();
+            PK1 new_pk1 = (this is JPK1) ? new JPK1() : new PK1();
             Array.Copy(Data, 0, new_pk1.Data, 0, Data.Length);
             Array.Copy(otname, 0, new_pk1.otname, 0, otname.Length);
             Array.Copy(nick, 0, new_pk1.nick, 0, nick.Length);
+            if (nick.Any(b => b == 0xEF))
+            {
+                Console.WriteLine(string.Join(",", nick.Select(b => b.ToString("X2"))));
+                Console.WriteLine(RBY_Encoding.GetString(new_pk1.nick, this is JPK1));
+                Console.WriteLine(RBY_Encoding.GetString(nick, this is JPK1) == RBY_Encoding.GetString(new_pk1.nick, this is JPK1));
+            }
             return new_pk1;
         }
 
@@ -31,8 +37,8 @@ namespace Rhydon
         public byte[] Data; // Raw Storage
         public string Identifier; // User or Form Custom Attribute
 
-        private byte[] otname = Enumerable.Repeat((byte)0x50, 0xB).ToArray();
-        private byte[] nick = Enumerable.Repeat((byte)0x50, 0xB).ToArray();
+        protected byte[] otname = Enumerable.Repeat((byte)0x50, 0xB).ToArray();
+        protected byte[] nick = Enumerable.Repeat((byte)0x50, 0xB).ToArray();
 
         public byte[] OT_Name { get { return otname; } set { if (value == null) return; value.CopyTo(otname, 0); } }
         public byte[] Nickname { get { return nick; } set { if (value == null) return; value.CopyTo(nick, 0); } }
@@ -697,6 +703,15 @@ namespace Rhydon
             Slash = 0xa3,
             Substitute = 0xa4,
             Struggle = 0xa5
+        }
+    }
+
+    public class JPK1 : PK1
+    {
+        public JPK1(byte[] d = null, string i = "") : base(d, i)
+        {
+            otname = Enumerable.Repeat((byte)0x50, 0x6).ToArray();
+            nick = Enumerable.Repeat((byte)0x50, 0x6).ToArray();
         }
     }
   }

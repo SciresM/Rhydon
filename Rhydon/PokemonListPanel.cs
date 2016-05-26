@@ -34,6 +34,9 @@ namespace Rhydon
             BackColor = Color.White;
             BorderStyle = BorderStyle.FixedSingle;
 
+            if (Capacity == 30)
+                Console.WriteLine("JP Box.");
+
             for (int i = 0; i < Capacity; i++)
             {
                 PartySprites[i] = new PictureBox
@@ -92,8 +95,12 @@ namespace Rhydon
                         Location = new Point(10, 5 + i*26),
                         Name = salt + "_" + i,
                         ContextMenuStrip = mnu,
-                        Tag = pokemonlist
+                        Tag = pokemonlist,
+                        AllowDrop = true
                     };
+                    PartySprites[i].DragEnter += HandleDragEnter;
+                    PartySprites[i].DragDrop += HandleDragDrop;
+                    PartySprites[i].MouseDown += HandleMouseDown;
 
                     Pokemon[i] = new Label
                     {
@@ -102,8 +109,12 @@ namespace Rhydon
                         Location = new Point(31, 5 + i*26),
                         Name = salt + "_" + i,
                         ContextMenuStrip = mnu,
-                        Tag = pokemonlist
+                        Tag = pokemonlist,
+                        AllowDrop = true
                     };
+                    Pokemon[i].DragEnter += HandleDragEnter;
+                    Pokemon[i].DragDrop += HandleDragDrop;
+                    Pokemon[i].MouseDown += HandleMouseDown;
 
                     Controls.Add(PartySprites[i]);
                     Controls.Add(Pokemon[i]);
@@ -124,7 +135,7 @@ namespace Rhydon
             if (i < pokemonlist.Count)
             {
                 PartySprites[i].Image = Util.GetPartySprite(pokemonlist[i]);
-                Pokemon[i].Text = RBY_Encoding.GetString(pokemonlist[i].Nickname);  
+                Pokemon[i].Text = RBY_Encoding.GetString(pokemonlist[i].Nickname, pokemonlist[i] is JPK1);  
             }
             else
             {
@@ -232,12 +243,24 @@ namespace Rhydon
                 if (files.Length <= 0)
                     return;
                 FileInfo fi = new FileInfo((string)files[0]);
-                if ((int) fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
+                if ((int) fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single) && !mf.JP_Mode)
                 {
                     byte[] data = File.ReadAllBytes((string) files[0]);
                     if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
                     {
                         parent.set(slot, new PokemonList(data)[0]);
+                    }
+                    else
+                    {
+                        mf.openFile((string)files[0]);
+                    }
+                }
+                else if ((int) fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single, true) && mf.JP_Mode)
+                {
+                    byte[] data = File.ReadAllBytes((string)files[0]);
+                    if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // JPK1
+                    {
+                        parent.set(slot, new PokemonList(data, PokemonList.CapacityType.Single, true)[0]);
                     }
                     else
                     {
@@ -256,12 +279,24 @@ namespace Rhydon
                 if (sender_parent == null)
                 {
                     FileInfo fi = new FileInfo((string)files[0]);
-                    if ((int)fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single))
+                    if ((int)fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single) && !mf.JP_Mode)
                     {
                         byte[] data = File.ReadAllBytes((string)files[0]);
                         if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // PK1
                         {
                             parent.set(slot, new PokemonList(data)[0]);
+                        }
+                        else
+                        {
+                            mf.openFile((string)files[0]);
+                        }
+                    }
+                    else if ((int)fi.Length == PokemonList.GetDataLength(PokemonList.CapacityType.Single, true) && mf.JP_Mode)
+                    {
+                        byte[] data = File.ReadAllBytes((string)files[0]);
+                        if (data[0] == 1 && data[2] == 0xFF && data[1] == data[3]) // JPK1
+                        {
+                            parent.set(slot, new PokemonList(data, PokemonList.CapacityType.Single, true)[0]);
                         }
                         else
                         {
@@ -296,6 +331,8 @@ namespace Rhydon
         {
             if (e.Button != MouseButtons.Left || e.Clicks != 1) return;
 
+            Console.WriteLine("HandleMouseDown");
+
             Control c = sender as Control;
             if (!(c.FindForm() is MainForm))
                 return;
@@ -314,8 +351,8 @@ namespace Rhydon
             byte[] dragdata = new PokemonList(parent.pokemonlist[index]).GetBytes();
 
 
-            string filename = RBY_Encoding.GetString(parent.pokemonlist[index].Nickname) + " - " +
-                              RBY_Encoding.GetString(parent.pokemonlist[index].OT_Name) + ".pk1";
+            string filename = RBY_Encoding.GetString(parent.pokemonlist[index].Nickname, parent.pokemonlist[index] is JPK1) + " - " +
+                              RBY_Encoding.GetString(parent.pokemonlist[index].OT_Name, parent.pokemonlist[index] is JPK1) + (parent.pokemonlist[index] is JPK1 ? ".jpk1" : ".pk1");
 
             string newfile = Path.Combine(Path.GetTempPath(), Util.CleanFileName(filename));
             try
