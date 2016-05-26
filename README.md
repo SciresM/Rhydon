@@ -1,7 +1,7 @@
 # Rhydon
 Save file editor for Pokemon Red/Blue/Yellow.
 
-Currently (as far as I know) only supports US save files, from game cartidges, emulators, or the 3DS VC re-releases.
+Currently (as far as I know) only supports US/JP save files, from game cartidges, emulators, or the 3DS VC re-releases.
 
 Allows for the exporting of individual pokemon in the .pk1 format.
 
