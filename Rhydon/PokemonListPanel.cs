@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using Rhydon.Properties;
 
 namespace Rhydon
 {
@@ -29,7 +30,6 @@ namespace Rhydon
             mnu.Items[2].Click += HandleDelete;
 
             AutoScroll = true;
-            Size = MaximumSize = MinimumSize = new Size(191, 26*num_visible);
             Location = new Point(5, 20);
             BackColor = Color.White;
             BorderStyle = BorderStyle.FixedSingle;
@@ -51,7 +51,6 @@ namespace Rhydon
 
                 Pokemon[i] = new Label
                 {
-                    Font = Util.Pokered_US,
                     AutoSize = true,
                     Location = new Point(31, 5 + i*26),
                     Name = salt + salt + "_" + i,
@@ -59,6 +58,10 @@ namespace Rhydon
                     Tag = pokemonlist,
                     AllowDrop = true
                 };
+                if (Settings.Default.UseUsFont)
+                {
+                    Pokemon[i].Font = Util.Pokered_US;
+                }
                 Pokemon[i].DragEnter += HandleDragEnter;
                 Pokemon[i].DragDrop += HandleDragDrop;
                 Pokemon[i].MouseDown += HandleMouseDown;
@@ -101,7 +104,6 @@ namespace Rhydon
 
                     Pokemon[i] = new Label
                     {
-                        Font = Util.Pokered_US,
                         AutoSize = true,
                         Location = new Point(31, 5 + i*26),
                         Name = salt + "_" + i,
@@ -109,6 +111,10 @@ namespace Rhydon
                         Tag = pokemonlist,
                         AllowDrop = true
                     };
+                    if (Settings.Default.UseUsFont)
+                    {
+                        Pokemon[i].Font = Util.Pokered_US;
+                    }
                     Pokemon[i].DragEnter += HandleDragEnter;
                     Pokemon[i].DragDrop += HandleDragDrop;
                     Pokemon[i].MouseDown += HandleMouseDown;
