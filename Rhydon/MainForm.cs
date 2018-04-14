@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Windows.Forms;
+using Rhydon.Properties;
 using Rhydon.SAV;
 
 namespace Rhydon
@@ -79,18 +80,33 @@ namespace Rhydon
                 tp.Select();
             tabMain.SelectTab(tabMain.TabPages[0]);
 
-            TB_OT.Font = Util.Pokered_US;
-            TB_Nickname.Font = Util.Pokered_US;
-            TB_SaveName.Font = Util.Pokered_US;
-            TB_Rival.Font = Util.Pokered_US;
+            if (Settings.Default.UseUsFont)
+            {
+                TB_OT.Font = Util.Pokered_US;
+                TB_Nickname.Font = Util.Pokered_US;
+                TB_SaveName.Font = Util.Pokered_US;
+                TB_Rival.Font = Util.Pokered_US;
+            }
 
-            PLC_Box = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Stored), mnuVSD) { Location = new Point(16, 35) };
-            PLC_Party = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Party), mnuVSD) { Location = new Point(16, 35) };
-            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE) { Location = new Point(16, 214) };
+            PLC_Box = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Stored), mnuVSD)
+            {
+                Dock = DockStyle.Fill,
+                AutoSize = true
+            };
+            PLC_Party = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Party), mnuVSD)
+            {
+                Dock = DockStyle.Fill,
+                AutoSize = true
+            };
+            PLC_DayCare = new PokemonListPanel(new PokemonList(PokemonList.CapacityType.Daycare), mnuVSD, PokemonList.CAPACITY_DAYCARE)
+            {
+                Dock = DockStyle.Fill,
+                AutoSize = true
+            };
 
-            Tab_BoxDaycare.Controls.Add(PLC_Box);
-            Tab_PartyMisc.Controls.Add(PLC_Party);
-            Tab_BoxDaycare.Controls.Add(PLC_DayCare);
+            BoxesTableLayout.Controls.Add(PLC_Box, 0, 1);
+            DaycareGroupBox.Controls.Add(PLC_DayCare);
+            PartyGroupBox.Controls.Add(PLC_Party);
             foreach (TabPage tp in tabBoxMulti.TabPages)
             {
                 tp.Select();
